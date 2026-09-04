@@ -1,6 +1,6 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useTransition, useOptimistic } from 'react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toggleRecord } from './actions'
 
@@ -14,10 +14,14 @@ export default function ChecklistItemComponent({
   date: string
 }) {
   const [isPending, startTransition] = useTransition()
-  const isCompleted = record?.completed ?? false
+  const [optimisticCompleted, setOptimisticCompleted] = useOptimistic(
+    record?.completed ?? false,
+    (state, newValue: boolean) => newValue
+  )
 
   const handleCheckedChange = (checked: boolean) => {
     startTransition(async () => {
+      setOptimisticCompleted(checked)
       await toggleRecord(item.id, date, checked)
     })
   }
@@ -26,7 +30,7 @@ export default function ChecklistItemComponent({
     <div className="flex items-center space-x-3 p-3 rounded-md hover:bg-muted/50 transition-colors">
       <Checkbox
         id={item.id}
-        checked={isCompleted}
+        checked={optimisticCompleted}
         onCheckedChange={handleCheckedChange}
         disabled={isPending}
         className="w-6 h-6"
@@ -34,7 +38,7 @@ export default function ChecklistItemComponent({
       <label
         htmlFor={item.id}
         className={`text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
-          isCompleted ? 'text-muted-foreground line-through' : ''
+          optimisticCompleted ? 'text-muted-foreground line-through' : ''
         }`}
       >
         {item.name}
