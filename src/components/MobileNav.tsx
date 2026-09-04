@@ -28,11 +28,9 @@ export default function MobileNav({ isAdmin }: { isAdmin: boolean }) {
   return (
     <div className="md:hidden">
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">메뉴 열기</span>
-          </Button>
+        <SheetTrigger className="md:hidden inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground h-9 w-9">
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">메뉴 열기</span>
         </SheetTrigger>
         <SheetContent side="right" className="w-[250px] sm:w-[300px]">
           <SheetHeader>
