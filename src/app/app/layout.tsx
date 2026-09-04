@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 import { logout } from '@/app/auth/actions'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import MobileNav from '@/components/MobileNav'
 
 export default async function AppLayout({
   children,
@@ -46,6 +47,7 @@ export default async function AppLayout({
           <div className="text-sm text-muted-foreground hidden sm:block">
             {membership ? `${membership.community?.name} ${membership.cell?.name || '(셀 미배정)'}` : '소속 없음'}
           </div>
+          <MobileNav isAdmin={membership?.role === 'admin'} />
           <form action={logout}>
             <Button variant="ghost" size="sm" type="submit">
               로그아웃
