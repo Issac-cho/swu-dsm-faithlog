@@ -23,8 +23,9 @@ export default function CellAssigner({
 }) {
   const [isPending, startTransition] = useTransition()
 
-  const handleValueChange = (val: string) => {
+  const handleValueChange = (val: string | null) => {
     startTransition(async () => {
+      if (val === null) return;
       const cellId = val === 'none' ? null : val
       await assignUserToCell(membershipId, cellId)
     })

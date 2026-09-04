@@ -53,7 +53,7 @@ export default function AdminShepherdManager({
         <form onSubmit={handleAssign} className="flex gap-4 items-end">
           <div className="space-y-2 flex-1">
             <label className="text-sm font-medium">목자 선택</label>
-            <Select value={shepherdId} onValueChange={setShepherdId} disabled={isPending}>
+            <Select value={shepherdId} onValueChange={(val) => setShepherdId(val || '')} disabled={isPending}>
               <SelectTrigger>
                 <SelectValue placeholder="목자 선택">
                   {shepherdId ? members.find(m => m.user_id === shepherdId)?.name : '목자 선택'}
@@ -68,7 +68,7 @@ export default function AdminShepherdManager({
           </div>
           <div className="space-y-2 flex-1">
             <label className="text-sm font-medium">양 선택</label>
-            <Select value={sheepId} onValueChange={setSheepId} disabled={isPending}>
+            <Select value={sheepId} onValueChange={(val) => setSheepId(val || '')} disabled={isPending}>
               <SelectTrigger>
                 <SelectValue placeholder="양 선택">
                   {sheepId ? members.find(m => m.user_id === sheepId)?.name : '양 선택'}

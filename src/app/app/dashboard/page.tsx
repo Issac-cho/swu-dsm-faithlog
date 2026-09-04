@@ -69,7 +69,7 @@ export default async function DashboardPage() {
     <div className="p-4 md:p-6 space-y-8">
       <div>
         <h1 className="text-2xl font-bold">대시보드</h1>
-        <p className="text-muted-foreground">{membership.community?.name} 공동체에서의 영성생활</p>
+        <p className="text-muted-foreground">{(membership.community as any)?.name} 공동체에서의 영성생활</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -93,9 +93,9 @@ export default async function DashboardPage() {
                 />
               </div>
             </div>
-            <Button asChild className="w-full">
-              <Link href="/app/checklist">체크리스트 작성하기</Link>
-            </Button>
+            <Link href="/app/checklist" className="w-full">
+              <Button className="w-full">체크리스트 작성하기</Button>
+            </Link>
           </CardContent>
         </Card>
 
@@ -113,9 +113,9 @@ export default async function DashboardPage() {
                 <p className="text-sm text-muted-foreground italic">이번 주 다짐을 아직 작성하지 않았습니다.</p>
               )}
             </div>
-            <Button asChild variant="outline" className="w-full">
-              <Link href="/app/reflection">다짐/평가 보러가기</Link>
-            </Button>
+            <Link href="/app/reflection" className="w-full">
+              <Button variant="outline" className="w-full">다짐/평가 보러가기</Button>
+            </Link>
           </CardContent>
         </Card>
 

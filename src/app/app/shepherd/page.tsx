@@ -37,7 +37,7 @@ export default async function ShepherdPage() {
           relationships.map(rel => (
             <Card key={rel.sheep_id}>
               <CardHeader>
-                <CardTitle>{rel.profile?.name}</CardTitle>
+                <CardTitle>{(rel.profile as any)?.name}</CardTitle>
                 <CardDescription>
                   <Link href={`/app/shepherd/${rel.sheep_id}?date=${todayInKST}`} className="text-primary hover:underline">
                     체크리스트 보기

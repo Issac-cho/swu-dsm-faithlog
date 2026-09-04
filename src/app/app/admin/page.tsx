@@ -32,7 +32,7 @@ export default async function AdminPage() {
   }
 
   const communityId = myMembership.community_id
-  const communityName = myMembership.community?.name || ''
+  const communityName = (myMembership.community as any)?.name || ''
 
   // Fetch cells
   const { data: cells } = await supabase
@@ -52,7 +52,7 @@ export default async function AdminPage() {
   const flatMembers = members?.map(m => ({
     id: m.id,
     user_id: m.user_id,
-    name: m.profile?.name || '이름 없음',
+    name: (m.profile as any)?.name || '이름 없음',
   })) || []
 
   // Fetch shepherd relationships for this community
@@ -76,7 +76,7 @@ export default async function AdminPage() {
             <CardTitle>셀 추가</CardTitle>
           </CardHeader>
           <CardContent>
-            <form action={createCell} className="flex gap-2">
+            <form action={async (fd) => { 'use server'; await createCell(fd) }} className="flex gap-2">
               <input type="hidden" name="communityId" value={communityId} />
               <Input name="name" placeholder="새로운 셀 이름 (예: 1셀)" required />
               <Button type="submit">추가</Button>
@@ -113,7 +113,7 @@ export default async function AdminPage() {
                 {members?.map((member) => (
                   <TableRow key={member.id}>
                     <TableCell className="font-medium">
-                      {member.profile?.name || '이름 없음'}
+                      {(member.profile as any)?.name || '이름 없음'}
                     </TableCell>
                     <TableCell>
                       {member.role === 'admin' ? '관리자' : '일반 멤버'}
