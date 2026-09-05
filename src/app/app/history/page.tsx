@@ -123,7 +123,7 @@ export default async function HistoryPage({
     .gte('record_date', format(calendarStart, 'yyyy-MM-dd'))
     .lte('record_date', format(calendarEnd, 'yyyy-MM-dd'))
 
-  const monthlyProgressMap = new Map<string, { percentage: number }>()
+  const monthlyProgressMap = new Map<string, { percentage: number; total: number }>()
 
   calendarDays.forEach(day => {
     const dayStr = format(day, 'yyyy-MM-dd')
