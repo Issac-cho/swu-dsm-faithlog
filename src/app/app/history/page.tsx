@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { startOfWeek, addDays, format, subDays, getDay } from 'date-fns'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { startOfWeek, addDays, format } from 'date-fns'
 import { formatInTimeZone } from 'date-fns-tz'
 
 export default async function HistoryPage() {
@@ -18,6 +18,8 @@ export default async function HistoryPage() {
     .from('community_memberships')
     .select('id')
     .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
     .single()
 
   if (!membership) {
@@ -25,10 +27,12 @@ export default async function HistoryPage() {
   }
 
   // Weekly History Logic
-  // Monday start week
-  const weekStart = startOfWeek(today, { weekStartsOn: 1 })
+  // Sunday start week (0)
+  const weekStart = startOfWeek(today, { weekStartsOn: 0 })
   const weekDays = Array.from({ length: 7 }).map((_, i) => addDays(weekStart, i))
   const weekDaysStr = weekDays.map(d => format(d, 'yyyy-MM-dd'))
+  const weekRangeStr = `${format(weekDays[0], 'yyyy.MM.dd')} ~ ${format(weekDays[6], 'yyyy.MM.dd')}`
+  const headers = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 
   const { data: items } = await supabase
     .from('checklist_items')
@@ -54,64 +58,75 @@ export default async function HistoryPage() {
     <div className="p-4 md:p-6 space-y-8">
       <div>
         <h1 className="text-2xl font-bold">기록 및 통계</h1>
-        <p className="text-muted-foreground">나의 영성생활 발자취를 돌아봅니다.</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>이번 주 기록</CardTitle>
-          <CardDescription>이번 주 월요일부터 일요일까지의 진행 상황입니다.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr>
-                  <th className="border p-2 text-left font-medium bg-muted/50">항목</th>
-                  {weekDays.map(d => (
-                    <th key={d.toString()} className={`border p-2 text-center font-medium ${format(d, 'yyyy-MM-dd') === todayInKST ? 'bg-primary/10' : 'bg-muted/50'}`}>
-                      {format(d, 'MM/dd')}
-                      <div className="text-xs text-muted-foreground font-normal">
-                        {['일', '월', '화', '수', '목', '금', '토'][getDay(d)]}
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {items?.map(item => (
-                  <tr key={item.id}>
-                    <td className="border p-2 font-medium">{item.name}</td>
-                    {weekDaysStr.map(dateStr => {
-                      const completed = recordMap.get(`${item.id}-${dateStr}`)
-                      return (
-                        <td key={dateStr} className="border p-2 text-center">
-                          {completed ? (
-                            <span className="text-green-600 font-bold">O</span>
-                          ) : (
-                            <span className="text-muted-foreground/30">-</span>
-                          )}
-                        </td>
-                      )
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="weekly" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="weekly">주간</TabsTrigger>
+          <TabsTrigger value="monthly">월간</TabsTrigger>
+          <TabsTrigger value="yearly">연간</TabsTrigger>
+        </TabsList>
 
-      {/* TODO: Add Monthly, Quarterly, Yearly views here */}
-      <Card>
-        <CardHeader>
-          <CardTitle>월간/연간 통계 (준비 중)</CardTitle>
-          <CardDescription>달력 및 Heatmap 형태의 시각화가 곧 제공될 예정입니다.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">이 기능은 다음 업데이트에서 제공됩니다.</p>
-        </CardContent>
-      </Card>
+        <TabsContent value="weekly" className="mt-6">
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-center">{weekRangeStr}</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr>
+                    <th className="border p-2 bg-muted/50 w-24"></th>
+                    {headers.map((h, i) => (
+                      <th key={i} className="border p-2 text-center font-medium bg-muted/50 w-10">
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {items?.map(item => (
+                    <tr key={item.id}>
+                      <td className="border p-2 font-medium text-sm text-center">{item.name}</td>
+                      {weekDaysStr.map(dateStr => {
+                        const completed = recordMap.get(`${item.id}-${dateStr}`)
+                        const isPast = dateStr < todayInKST
+
+                        let cellContent = ''
+                        if (completed) {
+                          cellContent = 'o'
+                        } else if (isPast) {
+                          cellContent = 'x'
+                        }
+
+                        return (
+                          <td key={dateStr} className="border p-2 text-center font-medium">
+                            {cellContent === 'o' && <span className="text-green-600">o</span>}
+                            {cellContent === 'x' && <span className="text-red-500">x</span>}
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  ))}
+                  {(!items || items.length === 0) && (
+                    <tr>
+                      <td colSpan={8} className="border p-4 text-center text-sm text-muted-foreground">
+                        설정된 영성생활 항목이 없습니다.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="monthly" className="mt-6">
+          {/* 빈 페이지 */}
+        </TabsContent>
+
+        <TabsContent value="yearly" className="mt-6">
+          {/* 빈 페이지 */}
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
