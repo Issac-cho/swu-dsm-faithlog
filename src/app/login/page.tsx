@@ -1,12 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { login } from '@/app/auth/actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+
+function VerificationMessage() {
+  const searchParams = useSearchParams()
+  const isVerified = searchParams.get('verified') === 'true'
+
+  if (!isVerified) return null
+
+  return (
+    <div className="mb-4 p-3 text-sm text-green-800 bg-green-100 rounded-md border border-green-200">
+      이메일 인증이 성공적으로 완료되었습니다! 이제 로그인해 주세요.
+    </div>
+  )
+}
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
@@ -31,6 +45,9 @@ export default function LoginPage() {
         </CardHeader>
         <form action={handleSubmit}>
           <CardContent className="space-y-4">
+            <Suspense fallback={null}>
+              <VerificationMessage />
+            </Suspense>
             <div className="space-y-2">
               <Label htmlFor="email">이메일</Label>
               <Input id="email" name="email" type="email" placeholder="이메일 입력" required />
