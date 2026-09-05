@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
-import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, addDays, addMonths, subMonths, format, isSameMonth } from 'date-fns'
+import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, addDays, addMonths, subMonths, format, isSameMonth, eachDayOfInterval } from 'date-fns'
 import { formatInTimeZone } from 'date-fns-tz'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -113,8 +113,7 @@ export default async function HistoryPage({
   const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 })
   const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 })
   
-  const numDays = Math.round((calendarEnd.getTime() - calendarStart.getTime()) / (1000 * 60 * 60 * 24)) + 1
-  const calendarDays = Array.from({ length: numDays }).map((_, i) => addDays(calendarStart, i))
+  const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd })
 
   const { data: monthRecords } = await supabase
     .from('checklist_records')
