@@ -94,3 +94,11 @@ export async function removeShepherd(relId: string) {
   revalidatePath('/app/admin')
   return { success: true }
 }
+
+export async function updateTalentPolicy(policyId: string, amount: number) {
+  const supabase = await createClient()
+  const { error } = await supabase.from('talent_policies').update({ talent_amount: amount }).eq('id', policyId)
+  if (error) return { error: error.message }
+  revalidatePath('/app/admin')
+  return { success: true }
+}

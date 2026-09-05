@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { createCell } from './actions'
 import CellAssigner from './CellAssigner'
 import AdminShepherdManager from './AdminShepherdManager'
+import TalentPolicyManager from './TalentPolicyManager'
 
 export default async function AdminPage() {
   const supabase = await createClient()
@@ -21,6 +22,8 @@ export default async function AdminPage() {
     .from('community_memberships')
     .select('community_id, role, community:communities(name)')
     .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
     .single()
 
   if (!myMembership || myMembership.role !== 'admin') {
@@ -56,12 +59,18 @@ export default async function AdminPage() {
   })) || []
 
   // Fetch shepherd relationships for this community
-  // We can get this by joining or simply getting all relationships where shepherd or sheep is in the community
   const memberIds = flatMembers.map(m => m.user_id)
   const { data: relationships } = await supabase
     .from('shepherd_relationships')
     .select('*')
     .in('shepherd_id', memberIds)
+
+  // Fetch talent policies
+  const { data: policies } = await supabase
+    .from('talent_policies')
+    .select('*')
+    .eq('community_id', communityId)
+    .order('checklist_name', { ascending: true })
 
   return (
     <div className="p-4 md:p-6 space-y-8">
@@ -134,16 +143,7 @@ export default async function AdminPage() {
 
         <AdminShepherdManager members={flatMembers} relationships={relationships || []} />
 
-        {/* 달란트 정책 설정 (MVP) */}
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>달란트 정책</CardTitle>
-            <CardDescription>공동체의 기본 영성생활 항목 달성 시 지급되는 달란트를 설정합니다. (향후 업데이트 예정)</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">현재 버전에선 DB 초기화 시 기본값(10점)이 자동 부여됩니다.</p>
-          </CardContent>
-        </Card>
+        <TalentPolicyManager policies={policies || []} />
       </div>
     </div>
   )
