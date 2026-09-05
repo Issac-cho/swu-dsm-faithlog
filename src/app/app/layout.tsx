@@ -4,6 +4,7 @@ import { logout } from '@/app/auth/actions'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
+import BackButton from '@/components/BackButton'
 
 export default async function AppLayout({
   children,
@@ -27,7 +28,8 @@ export default async function AppLayout({
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
+          <BackButton />
           <Link href="/app/dashboard" className="font-semibold text-lg">
             슈데페
           </Link>
