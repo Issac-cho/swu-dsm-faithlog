@@ -1,4 +1,4 @@
-const CACHE_NAME = 'swu-dsm-faithlog-v1';
+const CACHE_NAME = 'swu-dsm-faithlog-v2';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -9,9 +9,6 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
-  );
+  // Empty fetch handler is required for PWA installability,
+  // but we don't intercept requests to avoid "response served by service worker has redirections" error on iOS.
 });
