@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import HistoryTabs from './HistoryTabs'
+import DateJumpHeader from './DateJumpHeader'
 
 function DonutChart({ percentage }: { percentage: number }) {
   const radius = 14
@@ -241,15 +242,15 @@ export default async function HistoryPage({
         <div className="mt-6">
           {activeTab === 'weekly' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between mb-2 px-2">
-                <Link href={buildUrl('weekly', prevWeekStr)}>
-                  <Button variant="ghost" size="icon"><ChevronLeft className="h-5 w-5" /></Button>
-                </Link>
-                <h2 className="text-lg font-semibold text-center">{weekRangeStr}</h2>
-                <Link href={buildUrl('weekly', nextWeekStr)}>
-                  <Button variant="ghost" size="icon"><ChevronRight className="h-5 w-5" /></Button>
-                </Link>
-              </div>
+              <DateJumpHeader
+                type="weekly"
+                currentYear={targetDate.getFullYear()}
+                currentMonth={targetDate.getMonth() + 1}
+                currentDay={targetDate.getDate()}
+                prevUrl={buildUrl('weekly', prevWeekStr)}
+                nextUrl={buildUrl('weekly', nextWeekStr)}
+                label={weekRangeStr}
+              />
               <div className="overflow-x-auto select-none">
                 <table className="w-full border-collapse">
                   <thead>
@@ -301,21 +302,15 @@ export default async function HistoryPage({
 
           {activeTab === 'monthly' && (
             <div className="space-y-4 select-none">
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-sm font-semibold text-muted-foreground w-12 text-center">
-                  {format(currentMonthDate, 'yyyy')}년
-                </div>
-                <div className="flex items-center gap-4">
-                  <Link href={buildUrl('monthly', prevMonthStr)}>
-                    <Button variant="ghost" size="icon"><ChevronLeft className="h-5 w-5" /></Button>
-                  </Link>
-                  <h2 className="text-xl font-bold w-12 text-center">{format(currentMonthDate, 'M')}월</h2>
-                  <Link href={buildUrl('monthly', nextMonthStr)}>
-                    <Button variant="ghost" size="icon"><ChevronRight className="h-5 w-5" /></Button>
-                  </Link>
-                </div>
-                <div className="w-12"></div> {/* Spacer for alignment */}
-              </div>
+              <DateJumpHeader
+                type="monthly"
+                currentYear={targetDate.getFullYear()}
+                currentMonth={targetDate.getMonth() + 1}
+                currentDay={targetDate.getDate()}
+                prevUrl={buildUrl('monthly', prevMonthStr)}
+                nextUrl={buildUrl('monthly', nextMonthStr)}
+                label={`${format(currentMonthDate, 'yyyy')}년 ${format(currentMonthDate, 'M')}월`}
+              />
 
               <div className="border rounded-md overflow-hidden">
                 <div className="grid grid-cols-7 bg-muted/50 border-b">
@@ -353,15 +348,15 @@ export default async function HistoryPage({
 
           {activeTab === 'yearly' && (
             <div className="space-y-6 select-none pb-12">
-              <div className="flex items-center justify-between mb-2 px-2">
-                <Link href={buildUrl('yearly', prevYearStr)}>
-                  <Button variant="ghost" size="icon"><ChevronLeft className="h-5 w-5" /></Button>
-                </Link>
-                <h2 className="text-xl font-bold text-center">{format(currentYearDate, 'yyyy')}년</h2>
-                <Link href={buildUrl('yearly', nextYearStr)}>
-                  <Button variant="ghost" size="icon"><ChevronRight className="h-5 w-5" /></Button>
-                </Link>
-              </div>
+              <DateJumpHeader
+                type="yearly"
+                currentYear={targetDate.getFullYear()}
+                currentMonth={targetDate.getMonth() + 1}
+                currentDay={targetDate.getDate()}
+                prevUrl={buildUrl('yearly', prevYearStr)}
+                nextUrl={buildUrl('yearly', nextYearStr)}
+                label={`${format(currentYearDate, 'yyyy')}년`}
+              />
               
               <div className="flex flex-col gap-1.5 items-center">
                 <div className="flex items-center gap-1.5 mb-1">
