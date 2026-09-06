@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import HistoryTabs from './HistoryTabs'
-import SwipeContainer from './SwipeContainer'
 
 function DonutChart({ percentage }: { percentage: number }) {
   const radius = 14
@@ -215,198 +214,182 @@ export default async function HistoryPage({
 
         <div className="mt-6">
           {activeTab === 'weekly' && (
-            <SwipeContainer 
-              prevUrl={`?tab=weekly&date=${prevWeekStr}`} 
-              nextUrl={`?tab=weekly&date=${nextWeekStr}`}
-            >
-              <div className="space-y-4">
-                <div className="flex items-center justify-between mb-2 px-2">
-                  <Link href={`?tab=weekly&date=${prevWeekStr}`}>
-                    <Button variant="ghost" size="icon"><ChevronLeft className="h-5 w-5" /></Button>
-                  </Link>
-                  <h2 className="text-lg font-semibold text-center">{weekRangeStr}</h2>
-                  <Link href={`?tab=weekly&date=${nextWeekStr}`}>
-                    <Button variant="ghost" size="icon"><ChevronRight className="h-5 w-5" /></Button>
-                  </Link>
-                </div>
-                <div className="overflow-x-auto select-none">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr>
-                        <th className="border p-2 bg-muted/50 w-24"></th>
-                        {headers.map((h, i) => (
-                          <th key={i} className="border p-2 text-center font-medium bg-muted/50 w-10">
-                            {h}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {activeWeeklyItems.map(item => (
-                        <tr key={item.id}>
-                          <td className="border p-2 font-medium text-sm text-center">{item.name}</td>
-                          {weekDaysStr.map(dateStr => {
-                            const completed = weeklyRecordMap.get(`${item.id}-${dateStr}`)
-                            const isPast = dateStr < todayInKST
-
-                            let cellContent = ''
-                            if (completed) {
-                              cellContent = 'o'
-                            } else if (isPast) {
-                              cellContent = 'x'
-                            }
-
-                            return (
-                              <td key={dateStr} className="border p-2 text-center font-medium">
-                                {cellContent === 'o' && <span className="text-green-600">o</span>}
-                                {cellContent === 'x' && <span className="text-red-500">x</span>}
-                              </td>
-                            )
-                          })}
-                        </tr>
-                      ))}
-                      {activeWeeklyItems.length === 0 && (
-                        <tr>
-                          <td colSpan={8} className="border p-4 text-center text-sm text-muted-foreground">
-                            설정된 영성생활 항목이 없습니다.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between mb-2 px-2">
+                <Link href={`?tab=weekly&date=${prevWeekStr}`}>
+                  <Button variant="ghost" size="icon"><ChevronLeft className="h-5 w-5" /></Button>
+                </Link>
+                <h2 className="text-lg font-semibold text-center">{weekRangeStr}</h2>
+                <Link href={`?tab=weekly&date=${nextWeekStr}`}>
+                  <Button variant="ghost" size="icon"><ChevronRight className="h-5 w-5" /></Button>
+                </Link>
               </div>
-            </SwipeContainer>
+              <div className="overflow-x-auto select-none">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <th className="border p-2 bg-muted/50 w-24"></th>
+                      {headers.map((h, i) => (
+                        <th key={i} className="border p-2 text-center font-medium bg-muted/50 w-10">
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {activeWeeklyItems.map(item => (
+                      <tr key={item.id}>
+                        <td className="border p-2 font-medium text-sm text-center">{item.name}</td>
+                        {weekDaysStr.map(dateStr => {
+                          const completed = weeklyRecordMap.get(`${item.id}-${dateStr}`)
+                          const isPast = dateStr < todayInKST
+
+                          let cellContent = ''
+                          if (completed) {
+                            cellContent = 'o'
+                          } else if (isPast) {
+                            cellContent = 'x'
+                          }
+
+                          return (
+                            <td key={dateStr} className="border p-2 text-center font-medium">
+                              {cellContent === 'o' && <span className="text-green-600">o</span>}
+                              {cellContent === 'x' && <span className="text-red-500">x</span>}
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    ))}
+                    {activeWeeklyItems.length === 0 && (
+                      <tr>
+                        <td colSpan={8} className="border p-4 text-center text-sm text-muted-foreground">
+                          설정된 영성생활 항목이 없습니다.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           )}
 
           {activeTab === 'monthly' && (
-            <SwipeContainer 
-              prevUrl={`?tab=monthly&date=${prevMonthStr}`} 
-              nextUrl={`?tab=monthly&date=${nextMonthStr}`}
-            >
-              <div className="space-y-4 select-none">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="text-sm font-semibold text-muted-foreground w-12 text-center">
-                    {format(currentMonthDate, 'yyyy')}년
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <Link href={`?tab=monthly&date=${prevMonthStr}`}>
-                      <Button variant="ghost" size="icon"><ChevronLeft className="h-5 w-5" /></Button>
-                    </Link>
-                    <h2 className="text-xl font-bold w-12 text-center">{format(currentMonthDate, 'M')}월</h2>
-                    <Link href={`?tab=monthly&date=${nextMonthStr}`}>
-                      <Button variant="ghost" size="icon"><ChevronRight className="h-5 w-5" /></Button>
-                    </Link>
-                  </div>
-                  <div className="w-12"></div> {/* Spacer for alignment */}
+            <div className="space-y-4 select-none">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm font-semibold text-muted-foreground w-12 text-center">
+                  {format(currentMonthDate, 'yyyy')}년
                 </div>
-
-                <div className="border rounded-md overflow-hidden">
-                  <div className="grid grid-cols-7 bg-muted/50 border-b">
-                    {headers.map((h, i) => (
-                      <div key={i} className="p-2 text-center font-medium text-sm">
-                        {h}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-7">
-                    {calendarDays.map((day, i) => {
-                      const dayStr = format(day, 'yyyy-MM-dd')
-                      const isCurrentMonth = isSameMonth(day, currentMonthDate)
-                      const data = monthlyProgressMap.get(dayStr)
-                      const progress = data?.percentage || 0
-                      const hasItems = (data?.total || 0) > 0
-                      
-                      return (
-                        <Link 
-                          key={i} 
-                          href={`?tab=weekly&date=${dayStr}`}
-                          className={`border-b border-r min-h-[80px] p-1 flex flex-col items-center hover:bg-muted/30 transition-colors ${!isCurrentMonth ? 'bg-muted/20 opacity-50' : ''}`}
-                        >
-                          <div className="text-xs text-center text-muted-foreground mb-1 w-full">
-                            {format(day, 'd')}
-                          </div>
-                          {hasItems && <DonutChart percentage={progress} />}
-                        </Link>
-                      )
-                    })}
-                  </div>
-                </div>
-              </div>
-            </SwipeContainer>
-          )}
-
-          {activeTab === 'yearly' && (
-            <SwipeContainer 
-              prevUrl={`?tab=yearly&date=${prevYearStr}`} 
-              nextUrl={`?tab=yearly&date=${nextYearStr}`}
-            >
-              <div className="space-y-6 select-none pb-12">
-                <div className="flex items-center justify-between mb-2 px-2">
-                  <Link href={`?tab=yearly&date=${prevYearStr}`}>
+                <div className="flex items-center gap-4">
+                  <Link href={`?tab=monthly&date=${prevMonthStr}`}>
                     <Button variant="ghost" size="icon"><ChevronLeft className="h-5 w-5" /></Button>
                   </Link>
-                  <h2 className="text-xl font-bold text-center">{format(currentYearDate, 'yyyy')}년</h2>
-                  <Link href={`?tab=yearly&date=${nextYearStr}`}>
+                  <h2 className="text-xl font-bold w-12 text-center">{format(currentMonthDate, 'M')}월</h2>
+                  <Link href={`?tab=monthly&date=${nextMonthStr}`}>
                     <Button variant="ghost" size="icon"><ChevronRight className="h-5 w-5" /></Button>
                   </Link>
                 </div>
-                
-                <div className="flex flex-col gap-1.5 items-center">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <div className="w-10"></div>
-                    {headers.map((h, i) => (
-                      <div key={i} className="w-7 h-7 flex items-center justify-center text-xs font-medium text-muted-foreground">
-                        {h}
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {yearlyWeeks.map((week, i) => {
-                    const firstDayOfMonth = week.find(d => d.getDate() === 1 && d.getFullYear() === currentYearDate.getFullYear())
-                    const monthLabel = firstDayOfMonth ? format(firstDayOfMonth, 'MMM').toUpperCase() : ''
+                <div className="w-12"></div> {/* Spacer for alignment */}
+              </div>
+
+              <div className="border rounded-md overflow-hidden">
+                <div className="grid grid-cols-7 bg-muted/50 border-b">
+                  {headers.map((h, i) => (
+                    <div key={i} className="p-2 text-center font-medium text-sm">
+                      {h}
+                    </div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-7">
+                  {calendarDays.map((day, i) => {
+                    const dayStr = format(day, 'yyyy-MM-dd')
+                    const isCurrentMonth = isSameMonth(day, currentMonthDate)
+                    const data = monthlyProgressMap.get(dayStr)
+                    const progress = data?.percentage || 0
+                    const hasItems = (data?.total || 0) > 0
                     
                     return (
-                      <div key={i} className="flex items-center gap-1.5">
-                        <div className="w-10 text-[10px] font-bold text-muted-foreground text-right pr-2">
-                          {monthLabel}
+                      <Link 
+                        key={i} 
+                        href={`?tab=weekly&date=${dayStr}`}
+                        className={`border-b border-r min-h-[80px] p-1 flex flex-col items-center hover:bg-muted/30 transition-colors ${!isCurrentMonth ? 'bg-muted/20 opacity-50' : ''}`}
+                      >
+                        <div className="text-xs text-center text-muted-foreground mb-1 w-full">
+                          {format(day, 'd')}
                         </div>
-                        {week.map((day, j) => {
-                          const dayStr = format(day, 'yyyy-MM-dd')
-                          const isCurrentYear = day.getFullYear() === currentYearDate.getFullYear()
-                          
-                          if (!isCurrentYear) {
-                            return <div key={j} className="w-7 h-7 bg-transparent" />
-                          }
-                          
-                          const data = yearlyProgressMap.get(dayStr)
-                          const percentage = data?.percentage || 0
-                          const hasItems = (data?.total || 0) > 0
-                          
-                          let bgColor = 'bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
-                          if (hasItems) {
-                            if (percentage === 0) bgColor = 'bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
-                            else if (percentage <= 25) bgColor = 'bg-gray-300 dark:bg-gray-600'
-                            else if (percentage <= 50) bgColor = 'bg-gray-500 dark:bg-gray-500'
-                            else if (percentage <= 75) bgColor = 'bg-gray-700 dark:bg-gray-400'
-                            else bgColor = 'bg-gray-900 dark:bg-gray-200'
-                          }
-                          
-                          return (
-                            <Link 
-                              key={j}
-                              href={`?tab=weekly&date=${dayStr}`}
-                              className={`w-7 h-7 rounded-sm ${bgColor} hover:ring-2 hover:ring-primary/50 transition-all cursor-pointer`}
-                              title={`${dayStr}: ${Math.round(percentage)}%`}
-                            />
-                          )
-                        })}
-                      </div>
+                        {hasItems && <DonutChart percentage={progress} />}
+                      </Link>
                     )
                   })}
                 </div>
               </div>
-            </SwipeContainer>
+            </div>
+          )}
+
+          {activeTab === 'yearly' && (
+            <div className="space-y-6 select-none pb-12">
+              <div className="flex items-center justify-between mb-2 px-2">
+                <Link href={`?tab=yearly&date=${prevYearStr}`}>
+                  <Button variant="ghost" size="icon"><ChevronLeft className="h-5 w-5" /></Button>
+                </Link>
+                <h2 className="text-xl font-bold text-center">{format(currentYearDate, 'yyyy')}년</h2>
+                <Link href={`?tab=yearly&date=${nextYearStr}`}>
+                  <Button variant="ghost" size="icon"><ChevronRight className="h-5 w-5" /></Button>
+                </Link>
+              </div>
+              
+              <div className="flex flex-col gap-1.5 items-center">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <div className="w-10"></div>
+                  {headers.map((h, i) => (
+                    <div key={i} className="w-7 h-7 flex items-center justify-center text-xs font-medium text-muted-foreground">
+                      {h}
+                    </div>
+                  ))}
+                </div>
+                
+                {yearlyWeeks.map((week, i) => {
+                  const firstDayOfMonth = week.find(d => d.getDate() === 1 && d.getFullYear() === currentYearDate.getFullYear())
+                  const monthLabel = firstDayOfMonth ? format(firstDayOfMonth, 'MMM').toUpperCase() : ''
+                  
+                  return (
+                    <div key={i} className="flex items-center gap-1.5">
+                      <div className="w-10 text-[10px] font-bold text-muted-foreground text-right pr-2">
+                        {monthLabel}
+                      </div>
+                      {week.map((day, j) => {
+                        const dayStr = format(day, 'yyyy-MM-dd')
+                        const isCurrentYear = day.getFullYear() === currentYearDate.getFullYear()
+                        
+                        if (!isCurrentYear) {
+                          return <div key={j} className="w-7 h-7 bg-transparent" />
+                        }
+                        
+                        const data = yearlyProgressMap.get(dayStr)
+                        const percentage = data?.percentage || 0
+                        const hasItems = (data?.total || 0) > 0
+                        
+                        let bgColor = 'bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                        if (hasItems) {
+                          if (percentage === 0) bgColor = 'bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                          else if (percentage <= 25) bgColor = 'bg-gray-300 dark:bg-gray-600'
+                          else if (percentage <= 50) bgColor = 'bg-gray-500 dark:bg-gray-500'
+                          else if (percentage <= 75) bgColor = 'bg-gray-700 dark:bg-gray-400'
+                          else bgColor = 'bg-gray-900 dark:bg-gray-200'
+                        }
+                        
+                        return (
+                          <div 
+                            key={j}
+                            className={`w-7 h-7 rounded-sm ${bgColor}`}
+                            title={`${dayStr}: ${Math.round(percentage)}%`}
+                          />
+                        )
+                      })}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
           )}
         </div>
       </div>
