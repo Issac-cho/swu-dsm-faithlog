@@ -28,5 +28,6 @@ export async function saveReflection(
   if (error) return { error: error.message }
 
   revalidatePath('/app/reflection')
+  revalidatePath('/app/dashboard')
   return { success: true }
 }
