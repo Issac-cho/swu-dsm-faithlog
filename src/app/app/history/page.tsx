@@ -388,14 +388,13 @@ export default async function HistoryPage({
                         const data = yearlyProgressMap.get(dayStr)
                         const percentage = data?.percentage || 0
                         const hasItems = (data?.total || 0) > 0
-                        
-                        let bgColor = 'bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                        let bgColor = 'bg-background border border-border'
                         if (hasItems) {
-                          if (percentage === 0) bgColor = 'bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
-                          else if (percentage <= 25) bgColor = 'bg-gray-300 dark:bg-gray-600'
-                          else if (percentage <= 50) bgColor = 'bg-gray-500 dark:bg-gray-500'
-                          else if (percentage <= 75) bgColor = 'bg-gray-700 dark:bg-gray-400'
-                          else bgColor = 'bg-gray-900 dark:bg-gray-200'
+                          if (percentage === 0) bgColor = 'bg-background border border-border'
+                          else if (percentage <= 25) bgColor = 'bg-primary/25 border border-primary/20'
+                          else if (percentage <= 50) bgColor = 'bg-primary/50 border border-primary/40'
+                          else if (percentage <= 75) bgColor = 'bg-primary/75 border border-primary/60'
+                          else bgColor = 'bg-primary border border-primary'
                         }
                         
                         return (
