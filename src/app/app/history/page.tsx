@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
-import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, addDays, addMonths, subMonths, format, isSameMonth, subDays, eachDayOfInterval } from 'date-fns'
+import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, addDays, addMonths, subMonths, addYears, subYears, format, isSameMonth, subDays, eachDayOfInterval } from 'date-fns'
 import { formatInTimeZone } from 'date-fns-tz'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -151,6 +151,59 @@ export default async function HistoryPage({
     monthlyProgressMap.set(dayStr, { percentage, total })
   })
 
+  // --- YEARLY TAB LOGIC ---
+  const currentYearDate = targetDate
+  
+  const prevYearStr = format(subYears(currentYearDate, 1), 'yyyy-MM-dd')
+  const nextYearStr = format(addYears(currentYearDate, 1), 'yyyy-MM-dd')
+
+  const yearStart = startOfYear(currentYearDate)
+  const yearEnd = endOfYear(currentYearDate)
+  const yearlyCalendarStart = startOfWeek(yearStart, { weekStartsOn: 0 })
+  const yearlyCalendarEnd = endOfWeek(yearEnd, { weekStartsOn: 0 })
+
+  const yearlyDays = eachDayOfInterval({ start: yearlyCalendarStart, end: yearlyCalendarEnd })
+
+  let yearRecords: any[] = []
+  if (activeTab === 'yearly') {
+    const { data } = await supabase
+      .from('checklist_records')
+      .select('checklist_item_id, record_date, completed')
+      .eq('user_id', user.id)
+      .gte('record_date', format(yearlyCalendarStart, 'yyyy-MM-dd'))
+      .lte('record_date', format(yearlyCalendarEnd, 'yyyy-MM-dd'))
+      .limit(10000)
+    yearRecords = data || []
+  }
+
+  const yearlyProgressMap = new Map<string, { percentage: number; total: number }>()
+
+  if (activeTab === 'yearly') {
+    yearlyDays.forEach(day => {
+      const dayStr = format(day, 'yyyy-MM-dd')
+      const activeItemsForDay = allItems?.filter(item => {
+        if (item.type === 'SYSTEM') return true
+        const createdStr = formatInTimeZone(new Date(item.created_at), 'Asia/Seoul', 'yyyy-MM-dd')
+        const updatedStr = formatInTimeZone(new Date(item.updated_at), 'Asia/Seoul', 'yyyy-MM-dd')
+        if (createdStr > dayStr) return false
+        if (!item.is_active && updatedStr < dayStr) return false
+        return true
+      }) || []
+
+      const total = activeItemsForDay.length
+      const dayRecords = yearRecords?.filter(r => r.record_date === dayStr && r.completed) || []
+      const completed = dayRecords.filter(r => activeItemsForDay.some(ai => ai.id === r.checklist_item_id)).length
+      
+      const percentage = total > 0 ? (completed / total) * 100 : 0
+      yearlyProgressMap.set(dayStr, { percentage, total })
+    })
+  }
+
+  const yearlyWeeks = []
+  for (let i = 0; i < yearlyDays.length; i += 7) {
+    yearlyWeeks.push(yearlyDays.slice(i, i + 7))
+  }
+
   return (
     <div className="p-4 md:p-6 space-y-8">
       <div>
@@ -284,9 +337,76 @@ export default async function HistoryPage({
           )}
 
           {activeTab === 'yearly' && (
-            <div className="p-8 text-center text-muted-foreground border rounded-md">
-              연간 통계 기능은 준비 중입니다.
-            </div>
+            <SwipeContainer 
+              prevUrl={`?tab=yearly&date=${prevYearStr}`} 
+              nextUrl={`?tab=yearly&date=${nextYearStr}`}
+            >
+              <div className="space-y-6 select-none pb-12">
+                <div className="flex items-center justify-between mb-2 px-2">
+                  <Link href={`?tab=yearly&date=${prevYearStr}`}>
+                    <Button variant="ghost" size="icon"><ChevronLeft className="h-5 w-5" /></Button>
+                  </Link>
+                  <h2 className="text-xl font-bold text-center">{format(currentYearDate, 'yyyy')}년</h2>
+                  <Link href={`?tab=yearly&date=${nextYearStr}`}>
+                    <Button variant="ghost" size="icon"><ChevronRight className="h-5 w-5" /></Button>
+                  </Link>
+                </div>
+                
+                <div className="flex flex-col gap-1.5 items-center">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <div className="w-10"></div>
+                    {headers.map((h, i) => (
+                      <div key={i} className="w-7 h-7 flex items-center justify-center text-xs font-medium text-muted-foreground">
+                        {h}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {yearlyWeeks.map((week, i) => {
+                    const firstDayOfMonth = week.find(d => d.getDate() === 1 && d.getFullYear() === currentYearDate.getFullYear())
+                    const monthLabel = firstDayOfMonth ? format(firstDayOfMonth, 'MMM').toUpperCase() : ''
+                    
+                    return (
+                      <div key={i} className="flex items-center gap-1.5">
+                        <div className="w-10 text-[10px] font-bold text-muted-foreground text-right pr-2">
+                          {monthLabel}
+                        </div>
+                        {week.map((day, j) => {
+                          const dayStr = format(day, 'yyyy-MM-dd')
+                          const isCurrentYear = day.getFullYear() === currentYearDate.getFullYear()
+                          
+                          if (!isCurrentYear) {
+                            return <div key={j} className="w-7 h-7 bg-transparent" />
+                          }
+                          
+                          const data = yearlyProgressMap.get(dayStr)
+                          const percentage = data?.percentage || 0
+                          const hasItems = (data?.total || 0) > 0
+                          
+                          let bgColor = 'bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                          if (hasItems) {
+                            if (percentage === 0) bgColor = 'bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                            else if (percentage <= 25) bgColor = 'bg-gray-300 dark:bg-gray-600'
+                            else if (percentage <= 50) bgColor = 'bg-gray-500 dark:bg-gray-500'
+                            else if (percentage <= 75) bgColor = 'bg-gray-700 dark:bg-gray-400'
+                            else bgColor = 'bg-gray-900 dark:bg-gray-200'
+                          }
+                          
+                          return (
+                            <Link 
+                              key={j}
+                              href={`?tab=weekly&date=${dayStr}`}
+                              className={`w-7 h-7 rounded-sm ${bgColor} hover:ring-2 hover:ring-primary/50 transition-all cursor-pointer`}
+                              title={`${dayStr}: ${Math.round(percentage)}%`}
+                            />
+                          )
+                        })}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </SwipeContainer>
           )}
         </div>
       </div>
