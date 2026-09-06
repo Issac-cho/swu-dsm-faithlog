@@ -61,10 +61,8 @@ export default function DateJumpHeader({
       </Link>
       
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="ghost" className="text-xl font-bold hover:bg-muted/50 px-4 py-2 h-auto">
-            {label}
-          </Button>
+        <PopoverTrigger className="inline-flex items-center justify-center rounded-md text-xl font-bold hover:bg-muted/50 px-4 py-2 h-auto cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          {label}
         </PopoverTrigger>
         <PopoverContent className="w-auto p-3" align="center">
           <div className="flex gap-3 h-56 mb-3">
