@@ -47,10 +47,11 @@ function DonutChart({ percentage }: { percentage: number }) {
 export default async function HistoryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; date?: string }>
+  searchParams: Promise<{ tab?: string; date?: string; userId?: string }>
 }) {
   const resolvedSearchParams = await searchParams
   const activeTab = resolvedSearchParams.tab || 'weekly'
+  const targetUserId = resolvedSearchParams.userId
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -60,7 +61,23 @@ export default async function HistoryPage({
   const today = new Date()
   const todayInKST = formatInTimeZone(today, 'Asia/Seoul', 'yyyy-MM-dd')
   
-  // Check membership
+  // Determine whose data we are looking at
+  const queryUserId = targetUserId || user.id
+
+  // If looking at someone else, fetch their name
+  let targetUserName = ''
+  if (targetUserId && targetUserId !== user.id) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('name')
+      .eq('id', targetUserId)
+      .single()
+    if (profile) {
+      targetUserName = profile.name
+    }
+  }
+
+  // Check my membership (to ensure I'm logged in and in a community)
   const { data: membership } = await supabase
     .from('community_memberships')
     .select('id')
@@ -77,7 +94,7 @@ export default async function HistoryPage({
   const { data: allItems } = await supabase
     .from('checklist_items')
     .select('id, name, type, is_active, created_at, updated_at, sort_order')
-    .eq('user_id', user.id)
+    .eq('user_id', queryUserId)
     .order('sort_order', { ascending: true })
 
   const headers = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
@@ -85,6 +102,7 @@ export default async function HistoryPage({
   // Target date for both tabs
   const dateParam = resolvedSearchParams.date || todayInKST
   const targetDate = new Date(`${dateParam}T12:00:00Z`)
+
 
   // --- WEEKLY TAB LOGIC ---
   const weekStart = startOfWeek(targetDate, { weekStartsOn: 0 })
@@ -100,7 +118,7 @@ export default async function HistoryPage({
   const { data: weekRecords } = await supabase
     .from('checklist_records')
     .select('checklist_item_id, record_date, completed')
-    .eq('user_id', user.id)
+    .eq('user_id', queryUserId)
     .gte('record_date', weekDaysStr[0])
     .lte('record_date', weekDaysStr[6])
 
@@ -125,7 +143,7 @@ export default async function HistoryPage({
   const { data: monthRecords } = await supabase
     .from('checklist_records')
     .select('checklist_item_id, record_date, completed')
-    .eq('user_id', user.id)
+    .eq('user_id', queryUserId)
     .gte('record_date', format(calendarStart, 'yyyy-MM-dd'))
     .lte('record_date', format(calendarEnd, 'yyyy-MM-dd'))
 
@@ -168,7 +186,7 @@ export default async function HistoryPage({
     const { data } = await supabase
       .from('checklist_records')
       .select('checklist_item_id, record_date, completed')
-      .eq('user_id', user.id)
+      .eq('user_id', queryUserId)
       .gte('record_date', format(yearlyCalendarStart, 'yyyy-MM-dd'))
       .lte('record_date', format(yearlyCalendarEnd, 'yyyy-MM-dd'))
       .limit(10000)
@@ -203,10 +221,18 @@ export default async function HistoryPage({
     yearlyWeeks.push(yearlyDays.slice(i, i + 7))
   }
 
+  const buildUrl = (tab: string, date: string) => {
+    let url = `?tab=${tab}&date=${date}`
+    if (targetUserId) {
+      url += `&userId=${targetUserId}`
+    }
+    return url
+  }
+
   return (
     <div className="p-4 md:p-6 space-y-8">
       <div>
-        <h1 className="text-2xl font-bold">기록 및 통계</h1>
+        <h1 className="text-2xl font-bold">{targetUserName ? `${targetUserName} 님의 기록` : '기록 및 통계'}</h1>
       </div>
 
       <div className="w-full">
@@ -216,11 +242,11 @@ export default async function HistoryPage({
           {activeTab === 'weekly' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between mb-2 px-2">
-                <Link href={`?tab=weekly&date=${prevWeekStr}`}>
+                <Link href={buildUrl('weekly', prevWeekStr)}>
                   <Button variant="ghost" size="icon"><ChevronLeft className="h-5 w-5" /></Button>
                 </Link>
                 <h2 className="text-lg font-semibold text-center">{weekRangeStr}</h2>
-                <Link href={`?tab=weekly&date=${nextWeekStr}`}>
+                <Link href={buildUrl('weekly', nextWeekStr)}>
                   <Button variant="ghost" size="icon"><ChevronRight className="h-5 w-5" /></Button>
                 </Link>
               </div>
@@ -280,11 +306,11 @@ export default async function HistoryPage({
                   {format(currentMonthDate, 'yyyy')}년
                 </div>
                 <div className="flex items-center gap-4">
-                  <Link href={`?tab=monthly&date=${prevMonthStr}`}>
+                  <Link href={buildUrl('monthly', prevMonthStr)}>
                     <Button variant="ghost" size="icon"><ChevronLeft className="h-5 w-5" /></Button>
                   </Link>
                   <h2 className="text-xl font-bold w-12 text-center">{format(currentMonthDate, 'M')}월</h2>
-                  <Link href={`?tab=monthly&date=${nextMonthStr}`}>
+                  <Link href={buildUrl('monthly', nextMonthStr)}>
                     <Button variant="ghost" size="icon"><ChevronRight className="h-5 w-5" /></Button>
                   </Link>
                 </div>
@@ -310,7 +336,7 @@ export default async function HistoryPage({
                     return (
                       <Link 
                         key={i} 
-                        href={`?tab=weekly&date=${dayStr}`}
+                        href={buildUrl('weekly', dayStr)}
                         className={`border-b border-r min-h-[80px] p-1 flex flex-col items-center hover:bg-muted/30 transition-colors ${!isCurrentMonth ? 'bg-muted/20 opacity-50' : ''}`}
                       >
                         <div className="text-xs text-center text-muted-foreground mb-1 w-full">
@@ -328,11 +354,11 @@ export default async function HistoryPage({
           {activeTab === 'yearly' && (
             <div className="space-y-6 select-none pb-12">
               <div className="flex items-center justify-between mb-2 px-2">
-                <Link href={`?tab=yearly&date=${prevYearStr}`}>
+                <Link href={buildUrl('yearly', prevYearStr)}>
                   <Button variant="ghost" size="icon"><ChevronLeft className="h-5 w-5" /></Button>
                 </Link>
                 <h2 className="text-xl font-bold text-center">{format(currentYearDate, 'yyyy')}년</h2>
-                <Link href={`?tab=yearly&date=${nextYearStr}`}>
+                <Link href={buildUrl('yearly', nextYearStr)}>
                   <Button variant="ghost" size="icon"><ChevronRight className="h-5 w-5" /></Button>
                 </Link>
               </div>

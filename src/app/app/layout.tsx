@@ -39,7 +39,7 @@ export default async function AppLayout({
             <Link href="/app/history" className="hover:text-primary">기록</Link>
             <Link href="/app/reflection" className="hover:text-primary">다짐/평가</Link>
             <Link href="/app/cell" className="hover:text-primary">우리 셀</Link>
-            <Link href="/app/shepherd" className="hover:text-primary">나의 양</Link>
+            <Link href="/app/shepherd" className="hover:text-primary">목양</Link>
             {membership?.role === 'admin' && (
               <Link href="/app/admin" className="text-primary hover:underline">관리자</Link>
             )}
