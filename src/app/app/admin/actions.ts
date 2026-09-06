@@ -51,7 +51,7 @@ export async function assignUserToCell(membershipId: string, cellId: string | nu
     .eq('id', membershipId)
     .single()
 
-  if (!targetMembership) return { error: '멤버십을 찾을 수 없습니다.' }
+  if (!targetMembership) return { error: '멤버를 찾을 수 없습니다.' }
 
   // Check if current user is admin of that community
   const { data: myMembership } = await supabase
@@ -102,11 +102,12 @@ export async function updateTalentPolicy(policyId: string, amount: number) {
   revalidatePath('/app/admin')
   return { success: true }
 }
+
 export async function updateCommunityPassword(formData: FormData) {
   const password = formData.get('password') as string
   const communityId = formData.get('communityId') as string
 
-  if (!communityId) return { error: '커�??�티 ID가 ?�습?�다.' }
+  if (!communityId) return { error: '커뮤니티 ID가 없습니다.' }
 
   const supabase = await createClient()
 
@@ -122,7 +123,7 @@ export async function updateCommunityPassword(formData: FormData) {
     .single()
 
   if (membership?.role !== 'admin') {
-    return { error: '관리자 권한???�습?�다.' }
+    return { error: '관리자 권한이 없습니다.' }
   }
 
   // Update password
