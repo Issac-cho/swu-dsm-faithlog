@@ -55,7 +55,7 @@ export default async function DashboardPage() {
   }
 
   // 3. Fetch Weekly Reflection
-  const weekStart = startOfWeek(today, { weekStartsOn: 1 })
+  const weekStart = startOfWeek(today, { weekStartsOn: 0 })
   const weekStartStr = format(weekStart, 'yyyy-MM-dd')
   const { data: reflection } = await supabase
     .from('weekly_reflections')

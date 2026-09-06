@@ -21,9 +21,9 @@ export default async function ReflectionPage() {
     redirect('/app/community/join')
   }
 
-  // Calculate current week's Monday
+  // Calculate current week's Sunday
   const today = new Date()
-  const weekStart = startOfWeek(today, { weekStartsOn: 1 })
+  const weekStart = startOfWeek(today, { weekStartsOn: 0 })
   const weekStartStr = format(weekStart, 'yyyy-MM-dd')
 
   // Fetch this week's reflection
