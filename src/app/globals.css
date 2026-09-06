@@ -120,9 +120,16 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    overscroll-behavior: none;
+  }
+  html, body {
+    overscroll-behavior-y: none;
+    overscroll-behavior-x: none;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: auto;
   }
   body {
-    @apply bg-background text-foreground overscroll-y-none;
+    @apply bg-background text-foreground;
   }
   html {
     @apply font-sans;
