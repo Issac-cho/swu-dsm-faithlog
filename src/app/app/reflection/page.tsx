@@ -37,7 +37,7 @@ export default async function ReflectionPage() {
     .single()
 
   // Fetch ALL reflections for the community this week
-  const { data: allReflections } = await supabase
+  const { data: allReflections, error: allReflectionsError } = await supabase
     .from('weekly_reflections')
     .select(`
       *,
@@ -49,6 +49,10 @@ export default async function ReflectionPage() {
     .eq('community_id', membership.community_id)
     .eq('week_start_date', weekStartStr)
     .order('updated_at', { ascending: false })
+
+  if (allReflectionsError) {
+    console.error('Error fetching all reflections:', allReflectionsError)
+  }
 
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-8">
@@ -145,7 +149,15 @@ export default async function ReflectionPage() {
             )
           })}
           
-          {(!allReflections || allReflections.length === 0 || allReflections.every(r => !r.commitment && !r.review)) && (
+          {allReflectionsError && (
+            <div className="text-red-500 p-4 border border-red-500 rounded bg-red-50">
+              Error: {allReflectionsError.message}
+              <br />
+              Details: {allReflectionsError.details}
+            </div>
+          )}
+
+          {(!allReflections || allReflections.length === 0 || allReflections.every(r => !r.commitment && !r.review)) && !allReflectionsError && (
             <div className="text-center py-8 text-muted-foreground text-sm">
               아직 작성된 나눔이 없습니다.
             </div>
