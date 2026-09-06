@@ -8,6 +8,7 @@ import { createCell } from './actions'
 import CellAssigner from './CellAssigner'
 import AdminShepherdManager from './AdminShepherdManager'
 import TalentPolicyManager from './TalentPolicyManager'
+import CommunitySettings from './CommunitySettings'
 
 export default async function AdminPage() {
   const supabase = await createClient()
@@ -35,7 +36,15 @@ export default async function AdminPage() {
   }
 
   const communityId = myMembership.community_id
-  const communityName = (myMembership.community as any)?.name || ''
+  // Fetch community details
+  const { data: communityInfo } = await supabase
+    .from('communities')
+    .select('name, join_password')
+    .eq('id', communityId)
+    .single()
+
+  const communityName = communityInfo?.name || ''
+  const joinPassword = communityInfo?.join_password || ''
 
   // Fetch cells
   const { data: cells } = await supabase
@@ -78,6 +87,8 @@ export default async function AdminPage() {
         <h1 className="text-2xl font-bold">관리자 페이지</h1>
         <p className="text-muted-foreground">{communityName} 공동체 관리</p>
       </div>
+
+      <CommunitySettings communityId={communityId} initialPassword={joinPassword} />
 
       <div className="grid md:grid-cols-2 gap-6">
         <Card>
