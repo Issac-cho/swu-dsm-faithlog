@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { startOfWeek, format } from 'date-fns'
 import { formatInTimeZone } from 'date-fns-tz'
 import ReflectionForm from './ReflectionForm'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export default async function ReflectionPage() {
   const supabase = await createClient()
@@ -26,7 +27,7 @@ export default async function ReflectionPage() {
   const weekStart = startOfWeek(today, { weekStartsOn: 0 })
   const weekStartStr = format(weekStart, 'yyyy-MM-dd')
 
-  // Fetch this week's reflection
+  // Fetch this week's reflection for current user
   const { data: reflection } = await supabase
     .from('weekly_reflections')
     .select('*')
@@ -34,6 +35,20 @@ export default async function ReflectionPage() {
     .eq('community_id', membership.community_id)
     .eq('week_start_date', weekStartStr)
     .single()
+
+  // Fetch ALL reflections for the community this week
+  const { data: allReflections } = await supabase
+    .from('weekly_reflections')
+    .select(`
+      *,
+      profiles:user_id (
+        full_name,
+        avatar_url
+      )
+    `)
+    .eq('community_id', membership.community_id)
+    .eq('week_start_date', weekStartStr)
+    .order('updated_at', { ascending: false })
 
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-8">
@@ -54,7 +69,7 @@ export default async function ReflectionPage() {
               weekStartDate={weekStartStr}
               type="commitment"
               initialContent={reflection?.commitment || ''}
-              placeholder="예: 이번 주는 매일 아침 10분씩 큐티를 하고, 셀 모임에 꼭 참석하겠습니다."
+              placeholder="예) 이번 주는 매일 아침 10분씩 큐티를 하고, 셀 모임에 꼭 참석하겠습니다."
             />
           </CardContent>
         </Card>
@@ -62,7 +77,7 @@ export default async function ReflectionPage() {
         <Card>
           <CardHeader>
             <CardTitle>주간 평가</CardTitle>
-            <CardDescription>주말에 지난 한 주를 돌아보며 성찰과 감사의 제목을 적어보세요.</CardDescription>
+            <CardDescription>주말이 되면 한 주를 돌아보며 성찰과 감사의 제목을 적어보세요.</CardDescription>
           </CardHeader>
           <CardContent>
             <ReflectionForm
@@ -70,10 +85,72 @@ export default async function ReflectionPage() {
               weekStartDate={weekStartStr}
               type="review"
               initialContent={reflection?.review || ''}
-              placeholder="예: 바쁜 일정 속에서도 수요일에 기도 시간을 가진 것이 참 감사했습니다."
+              placeholder="예) 바쁜 일정 속에서도 수요일에 기도 시간을 가진 것이 참 감사했습니다."
             />
           </CardContent>
         </Card>
+      </div>
+
+      {/* Community Feed */}
+      <div className="mt-12 space-y-6">
+        <div>
+          <h2 className="text-xl font-bold">공동체 나눔</h2>
+          <p className="text-sm text-muted-foreground">우리 공동체 구성원들의 이번 주 다짐과 평가입니다.</p>
+        </div>
+        
+        <div className="space-y-6 bg-muted/30 p-4 rounded-xl">
+          {allReflections?.map((ref) => {
+            const isMe = ref.user_id === user.id
+            const profile = ref.profiles as any
+            const name = profile?.full_name || '이름 없음'
+            const avatarUrl = profile?.avatar_url
+            
+            // Skip rendering if both are empty
+            if (!ref.commitment && !ref.review) return null
+
+            return (
+              <div key={ref.id} className={`flex gap-3 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                {/* Avatar */}
+                <Avatar className="w-10 h-10 border shrink-0">
+                  <AvatarImage src={avatarUrl || ''} alt={name} />
+                  <AvatarFallback>{name.slice(0, 2)}</AvatarFallback>
+                </Avatar>
+
+                {/* Message Content */}
+                <div className={`flex flex-col max-w-[80%] ${isMe ? 'items-end' : 'items-start'}`}>
+                  <span className="text-xs text-muted-foreground mb-1 px-1">{name}</span>
+                  <div className={`p-3 rounded-2xl text-sm whitespace-pre-wrap ${
+                    isMe 
+                      ? 'bg-primary text-primary-foreground rounded-tr-sm' 
+                      : 'bg-background border rounded-tl-sm'
+                  }`}>
+                    {ref.commitment && (
+                      <div className="mb-2 last:mb-0">
+                        <span className="font-semibold text-xs opacity-70">다짐 :</span>
+                        <div className="mt-0.5">{ref.commitment}</div>
+                      </div>
+                    )}
+                    {ref.review && (
+                      <div>
+                        <span className="font-semibold text-xs opacity-70">평가 :</span>
+                        <div className="mt-0.5">{ref.review}</div>
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-[10px] text-muted-foreground mt-1 px-1">
+                    {formatInTimeZone(new Date(ref.updated_at), 'Asia/Seoul', 'MM.dd HH:mm')}
+                  </span>
+                </div>
+              </div>
+            )
+          })}
+          
+          {(!allReflections || allReflections.length === 0 || allReflections.every(r => !r.commitment && !r.review)) && (
+            <div className="text-center py-8 text-muted-foreground text-sm">
+              아직 작성된 나눔이 없습니다.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

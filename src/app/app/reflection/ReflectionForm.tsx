@@ -43,19 +43,21 @@ export default function ReflectionForm({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="flex gap-3 items-stretch">
       <textarea
-        className="w-full h-32 p-3 rounded-md border bg-transparent resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
+        className="flex-1 h-20 p-3 rounded-md border bg-transparent resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
         placeholder={placeholder}
         value={content}
         onChange={(e) => setContent(e.target.value)}
         disabled={isPending}
       />
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={isPending || content === initialContent}>
-          {isPending ? '저장 중...' : isSaved ? '저장됨' : '저장하기'}
-        </Button>
-      </div>
+      <Button 
+        onClick={handleSave} 
+        disabled={isPending || content === initialContent}
+        className="h-20 px-4 whitespace-nowrap"
+      >
+        {isPending ? '저장중..' : isSaved ? '저장됨' : '저장하기'}
+      </Button>
     </div>
   )
 }
