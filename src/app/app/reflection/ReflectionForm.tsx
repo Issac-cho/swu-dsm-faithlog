@@ -32,8 +32,13 @@ export default function ReflectionForm({
     if (!content.trim()) return
 
     startTransition(async () => {
-      await saveReflection(communityId, weekStartDate, type, content)
-      setIsSaved(true)
+      const res = await saveReflection(communityId, weekStartDate, type, content)
+      if (res.error) {
+        alert('저장에 실패했습니다: ' + res.error)
+        setIsSaved(false)
+      } else {
+        setIsSaved(true)
+      }
     })
   }
 
