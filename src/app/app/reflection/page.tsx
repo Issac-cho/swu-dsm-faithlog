@@ -42,8 +42,7 @@ export default async function ReflectionPage() {
     .select(`
       *,
       profiles:user_id (
-        full_name,
-        avatar_url
+        name
       )
     `)
     .eq('community_id', membership.community_id)
@@ -106,8 +105,7 @@ export default async function ReflectionPage() {
           {allReflections?.map((ref) => {
             const isMe = ref.user_id === user.id
             const profile = ref.profiles as any
-            const name = profile?.full_name || '이름 없음'
-            const avatarUrl = profile?.avatar_url
+            const name = profile?.name || '이름 없음'
             
             // Skip rendering if both are empty
             if (!ref.commitment && !ref.review) return null
@@ -116,7 +114,6 @@ export default async function ReflectionPage() {
               <div key={ref.id} className={`flex gap-3 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
                 {/* Avatar */}
                 <Avatar className="w-10 h-10 border shrink-0">
-                  <AvatarImage src={avatarUrl || ''} alt={name} />
                   <AvatarFallback>{name.slice(0, 2)}</AvatarFallback>
                 </Avatar>
 
