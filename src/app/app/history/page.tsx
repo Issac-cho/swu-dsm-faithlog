@@ -388,13 +388,19 @@ export default async function HistoryPage({
                         const data = yearlyProgressMap.get(dayStr)
                         const percentage = data?.percentage || 0
                         const hasItems = (data?.total || 0) > 0
-                        let bgColor = 'bg-background border border-border'
+                        let bgColor = 'bg-[#FFFFFF] border-border/50 border'
                         if (hasItems) {
-                          if (percentage === 0) bgColor = 'bg-background border border-border'
-                          else if (percentage <= 25) bgColor = 'bg-primary/25 border border-primary/20'
-                          else if (percentage <= 50) bgColor = 'bg-primary/50 border border-primary/40'
-                          else if (percentage <= 75) bgColor = 'bg-primary/75 border border-primary/60'
-                          else bgColor = 'bg-primary border border-primary'
+                          if (percentage === 0) bgColor = 'bg-[#FFFFFF] border-border/50 border'
+                          else if (percentage <= 10) bgColor = 'bg-[#FFF9FB] border-border/50 border'
+                          else if (percentage <= 20) bgColor = 'bg-[#FFF3F7] border-border/50 border'
+                          else if (percentage <= 30) bgColor = 'bg-[#FFEEF4] border-border/50 border'
+                          else if (percentage <= 40) bgColor = 'bg-[#FDE1E9] border-border/50 border'
+                          else if (percentage <= 50) bgColor = 'bg-[#FACDD9] border-border/50 border'
+                          else if (percentage <= 60) bgColor = 'bg-[#F6B5C7] border-border/50 border'
+                          else if (percentage <= 70) bgColor = 'bg-[#F29BB3] border-border/50 border'
+                          else if (percentage <= 80) bgColor = 'bg-[#EE809F] border-border/50 border'
+                          else if (percentage <= 90) bgColor = 'bg-[#EB6D94] border-border/50 border'
+                          else bgColor = 'bg-[#E85D8C] border-border/50 border'
                         }
                         
                         return (
