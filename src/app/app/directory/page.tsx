@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { BookOpen } from 'lucide-react'
+import Link from 'next/link'
 
 export default async function DirectoryPage() {
   const supabase = await createClient()
@@ -12,7 +13,7 @@ export default async function DirectoryPage() {
   // Fetch my membership
   const { data: membership } = await supabase
     .from('community_memberships')
-    .select('community_id, community:communities(name)')
+    .select('community_id, role, cell_id, community:communities(name)')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -22,10 +23,24 @@ export default async function DirectoryPage() {
     redirect('/app/community/join')
   }
 
+  // Fetch shepherd relationships for the current user
+  const { data: myRelationships } = await supabase
+    .from('shepherd_relationships')
+    .select('shepherd_id, sheep_id')
+    .eq('community_id', membership.community_id)
+    .or(`shepherd_id.eq.${user.id},sheep_id.eq.${user.id}`)
+
+  const allowedUserIds = new Set<string>()
+  allowedUserIds.add(user.id)
+  myRelationships?.forEach(r => {
+    allowedUserIds.add(r.shepherd_id)
+    allowedUserIds.add(r.sheep_id)
+  })
+
   // Fetch all members in this community
   const { data: members } = await supabase
     .from('community_memberships')
-    .select('user_id, role, cell:cells(name), profile:profiles(name, avatar_icon)')
+    .select('user_id, role, cell_id, cell:cells(name), profile:profiles(name, avatar_icon)')
     .eq('community_id', membership.community_id)
     .order('created_at', { ascending: true })
 
@@ -47,6 +62,13 @@ export default async function DirectoryPage() {
           const name = profile?.name || '이름 없음'
           const avatar = profile?.avatar_icon || '👤'
           const cellName = (member.cell as any)?.name
+
+          const canViewHistory = 
+            membership.role === 'admin' || 
+            membership.role === 'sub_admin' || 
+            member.user_id === user.id ||
+            (member.cell_id && member.cell_id === membership.cell_id) ||
+            allowedUserIds.has(member.user_id)
 
           return (
             <Card key={member.user_id} className="overflow-hidden hover:shadow-md transition-shadow">
@@ -70,6 +92,14 @@ export default async function DirectoryPage() {
                     <span>{cellName || '셀 미배정'}</span>
                   </div>
                 </div>
+                {canViewHistory && (
+                  <Link 
+                    href={`/app/history?userId=${member.user_id}`}
+                    className="mt-2 text-xs text-primary font-medium hover:underline bg-primary/5 px-3 py-1 rounded-full"
+                  >
+                    기록 보기
+                  </Link>
+                )}
               </CardContent>
             </Card>
           )

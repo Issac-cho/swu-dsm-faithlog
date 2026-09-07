@@ -131,7 +131,7 @@ export default async function AdminPage() {
                   <TableHead>이름</TableHead>
                   <TableHead>권한</TableHead>
                   <TableHead>소속 셀</TableHead>
-                  <TableHead>조회</TableHead>
+
                   <TableHead>관리</TableHead>
                 </TableRow>
               </TableHeader>
@@ -160,11 +160,7 @@ export default async function AdminPage() {
                           cells={cells || []}
                         />
                       </TableCell>
-                      <TableCell>
-                        <Link href={`/app/history?userId=${member.user_id}`} className="text-primary hover:underline text-sm font-medium">
-                          기록 보기
-                        </Link>
-                      </TableCell>
+
                       <TableCell className="space-x-1">
                         {myMembership.role === 'admin' && member.role !== 'admin' && (
                           <ChangeRoleButton
