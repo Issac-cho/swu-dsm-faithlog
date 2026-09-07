@@ -16,16 +16,10 @@ export async function createCell(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Unauthorized' }
 
-  const { data: membership } = await supabase
-    .from('community_memberships')
-    .select('role')
-    .eq('user_id', user.id)
-    .eq('community_id', communityId)
-    .single()
-
-  if (!['admin', 'sub_admin'].includes(membership?.role)) {
-    return { error: '관리자 권한이 없습니다.' }
-  }
+  const { data: operatorData } = await supabase.from('system_operators').select('user_id').eq('user_id', user.id).maybeSingle();
+  const isOperator = !!operatorData;
+  const { data: membership } = await supabase.from('community_memberships').select('role').eq('user_id', user.id).eq('community_id', communityId).maybeSingle();
+  if (!isOperator && !['admin', 'sub_admin'].includes(membership?.role)) return { error: '관리자 권한이 없습니다.' };
 
   const { error } = await supabase
     .from('cells')
@@ -54,16 +48,10 @@ export async function assignUserToCell(membershipId: string, cellId: string | nu
   if (!targetMembership) return { error: '멤버를 찾을 수 없습니다.' }
 
   // Check if current user is admin of that community
-  const { data: myMembership } = await supabase
-    .from('community_memberships')
-    .select('role')
-    .eq('user_id', user.id)
-    .eq('community_id', targetMembership.community_id)
-    .single()
-
-  if (!['admin', 'sub_admin'].includes(myMembership?.role)) {
-    return { error: '관리자 권한이 없습니다.' }
-  }
+  const { data: operatorData } = await supabase.from('system_operators').select('user_id').eq('user_id', user.id).maybeSingle();
+  const isOperator = !!operatorData;
+  const { data: myMembership } = await supabase.from('community_memberships').select('role').eq('user_id', user.id).eq('community_id', targetMembership.community_id).maybeSingle();
+  if (!isOperator && !['admin', 'sub_admin'].includes(myMembership?.role)) return { error: '관리자 권한이 없습니다.' };
 
   const { error } = await supabase
     .from('community_memberships')
@@ -115,16 +103,10 @@ export async function updateCommunityPassword(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Unauthorized' }
 
-  const { data: membership } = await supabase
-    .from('community_memberships')
-    .select('role')
-    .eq('user_id', user.id)
-    .eq('community_id', communityId)
-    .single()
-
-  if (!['admin', 'sub_admin'].includes(membership?.role)) {
-    return { error: '관리자 권한이 없습니다.' }
-  }
+  const { data: operatorData } = await supabase.from('system_operators').select('user_id').eq('user_id', user.id).maybeSingle();
+  const isOperator = !!operatorData;
+  const { data: membership } = await supabase.from('community_memberships').select('role').eq('user_id', user.id).eq('community_id', communityId).maybeSingle();
+  if (!isOperator && !['admin', 'sub_admin'].includes(membership?.role)) return { error: '관리자 권한이 없습니다.' };
 
   // Update password
   const { error } = await supabase
