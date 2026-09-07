@@ -12,7 +12,7 @@ import TalentPolicyManager from '@/app/app/admin/TalentPolicyManager'
 import CommunitySettings from '@/app/app/admin/CommunitySettings'
 import RemoveMemberButton from '@/app/app/admin/RemoveMemberButton'
 
-export default async function OperatorCommunityManagePage({ params }: { params: { id: string } }) {
+export default async function OperatorCommunityManagePage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -27,7 +27,8 @@ export default async function OperatorCommunityManagePage({ params }: { params: 
 
   if (!operatorData) return <div className="p-4 text-center text-destructive">권한이 없습니다.</div>
 
-  const communityId = params.id
+  const resolvedParams = await params
+  const communityId = resolvedParams.id
 
   // Fetch community details
   const { data: communityInfo } = await supabase

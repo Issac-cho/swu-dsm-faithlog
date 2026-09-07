@@ -5,7 +5,7 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import Link from 'next/link'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
-export default async function OperatorUserDetailPage({ params, searchParams }: { params: { userId: string }, searchParams: { communityId?: string } }) {
+export default async function OperatorUserDetailPage({ params, searchParams }: { params: Promise<{ userId: string }>, searchParams: Promise<{ communityId?: string }> }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -20,8 +20,11 @@ export default async function OperatorUserDetailPage({ params, searchParams }: {
 
   if (!operatorData) return <div className="p-4 text-center text-destructive">권한이 없습니다.</div>
 
-  const targetUserId = params.userId
-  const communityId = searchParams.communityId
+  const resolvedParams = await params
+  const resolvedSearchParams = await searchParams
+  
+  const targetUserId = resolvedParams.userId
+  const communityId = resolvedSearchParams.communityId
 
   // Fetch Profile
   const { data: profile } = await supabase

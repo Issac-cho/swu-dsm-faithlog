@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ChevronRight } from 'lucide-react'
 
-export default async function OperatorCommunityUsersPage({ params }: { params: { id: string } }) {
+export default async function OperatorCommunityUsersPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -23,7 +23,8 @@ export default async function OperatorCommunityUsersPage({ params }: { params: {
     return <div className="p-4 text-center text-destructive">권한이 없습니다.</div>
   }
 
-  const communityId = params.id
+  const resolvedParams = await params
+  const communityId = resolvedParams.id
 
   // Fetch Community Info
   const { data: community } = await supabase
