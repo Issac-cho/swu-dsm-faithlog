@@ -22,7 +22,7 @@ const navItems: NavItem[] = [
   { href: '/app/settings', label: '설정' },
 ]
 
-export default function MobileNav({ isAdmin }: { isAdmin: boolean }) {
+export default function MobileNav({ isAdmin, isOperator }: { isAdmin: boolean, isOperator?: boolean }) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -60,6 +60,19 @@ export default function MobileNav({ isAdmin }: { isAdmin: boolean }) {
                   }`}
                 >
                   관리자
+                </Link>
+              </div>
+            )}
+            {isOperator && (
+              <div className="pt-2">
+                <Link
+                  href="/app/operator"
+                  onClick={() => setOpen(false)}
+                  className={`block text-lg font-bold transition-colors p-3 rounded-md ${
+                    pathname.startsWith('/app/operator') ? 'bg-destructive/10 text-destructive' : 'text-destructive hover:bg-destructive/5'
+                  }`}
+                >
+                  👑 시스템 운영자
                 </Link>
               </div>
             )}

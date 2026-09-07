@@ -18,6 +18,15 @@ export default async function AppLayout({
     redirect('/login')
   }
 
+  // Fetch operator status
+  const { data: operatorData } = await supabase
+    .from('system_operators')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .maybeSingle()
+  
+  const isOperator = !!operatorData
+
   // Fetch membership
   const { data: membership } = await supabase
     .from('community_memberships')
@@ -43,6 +52,9 @@ export default async function AppLayout({
             {membership?.role === 'admin' && (
               <Link href="/app/admin" className="text-primary hover:underline">관리자</Link>
             )}
+            {isOperator && (
+              <Link href="/app/operator" className="text-destructive font-bold hover:underline">👑 시스템 운영자</Link>
+            )}
             <Link href="/app/settings" className="hover:text-primary">설정</Link>
           </nav>
         </div>
@@ -50,7 +62,7 @@ export default async function AppLayout({
           <div className="text-sm text-muted-foreground hidden sm:block">
             {membership ? `${membership.community?.name} ${membership.cell?.name || '(셀 미배정)'}` : '소속 없음'}
           </div>
-          <MobileNav isAdmin={membership?.role === 'admin'} />
+          <MobileNav isAdmin={membership?.role === 'admin'} isOperator={isOperator} />
           <form action={logout}>
             <Button variant="ghost" size="sm" type="submit">
               로그아웃

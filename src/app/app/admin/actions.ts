@@ -33,7 +33,7 @@ export async function createCell(formData: FormData) {
 
   if (error) return { error: error.message }
 
-  revalidatePath('/app/admin')
+  revalidatePath('/', 'layout')
   return { success: true }
 }
 
@@ -72,7 +72,7 @@ export async function assignUserToCell(membershipId: string, cellId: string | nu
 
   if (error) return { error: error.message }
 
-  revalidatePath('/app/admin')
+  revalidatePath('/', 'layout')
   return { success: true }
 }
 
@@ -83,7 +83,7 @@ export async function assignShepherd(shepherdId: string, sheepId: string) {
     sheep_id: sheepId
   })
   if (error) return { error: error.message }
-  revalidatePath('/app/admin')
+  revalidatePath('/', 'layout')
   return { success: true }
 }
 
@@ -91,7 +91,7 @@ export async function removeShepherd(relId: string) {
   const supabase = await createClient()
   const { error } = await supabase.from('shepherd_relationships').delete().eq('id', relId)
   if (error) return { error: error.message }
-  revalidatePath('/app/admin')
+  revalidatePath('/', 'layout')
   return { success: true }
 }
 
@@ -99,7 +99,7 @@ export async function updateTalentPolicy(policyId: string, amount: number) {
   const supabase = await createClient()
   const { error } = await supabase.from('talent_policies').update({ talent_amount: amount }).eq('id', policyId)
   if (error) return { error: error.message }
-  revalidatePath('/app/admin')
+  revalidatePath('/', 'layout')
   return { success: true }
 }
 
@@ -134,12 +134,12 @@ export async function updateCommunityPassword(formData: FormData) {
 
   if (error) return { error: error.message }
 
-  revalidatePath('/app/admin')
+  revalidatePath('/', 'layout')
   return { success: true }
 }
 export async function removeMember(membershipId: string) {
   const supabase = await createClient()
   const { error } = await supabase.from('community_memberships').delete().eq('id', membershipId)
   if (error) throw new Error(error.message)
-  revalidatePath('/app/admin')
+  revalidatePath('/', 'layout')
 }
