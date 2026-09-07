@@ -43,6 +43,7 @@ export default async function AppLayout({
             {membership?.role === 'admin' && (
               <Link href="/app/admin" className="text-primary hover:underline">관리자</Link>
             )}
+            <Link href="/app/settings" className="hover:text-primary">설정</Link>
           </nav>
         </div>
         <div className="flex items-center gap-4">

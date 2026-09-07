@@ -9,6 +9,7 @@ import CellAssigner from './CellAssigner'
 import AdminShepherdManager from './AdminShepherdManager'
 import TalentPolicyManager from './TalentPolicyManager'
 import CommunitySettings from './CommunitySettings'
+import RemoveMemberButton from './RemoveMemberButton'
 
 export default async function AdminPage() {
   const supabase = await createClient()
@@ -127,6 +128,7 @@ export default async function AdminPage() {
                   <TableHead>이름</TableHead>
                   <TableHead>권한</TableHead>
                   <TableHead>소속 셀</TableHead>
+                  <TableHead>관리</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -144,6 +146,14 @@ export default async function AdminPage() {
                         currentCellId={member.cell_id}
                         cells={cells || []}
                       />
+                    </TableCell>
+                    <TableCell>
+                      {member.role !== 'admin' && (
+                        <RemoveMemberButton 
+                          membershipId={member.id} 
+                          memberName={(member.profile as any)?.name || '이름 없음'} 
+                        />
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

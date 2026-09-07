@@ -19,6 +19,7 @@ const navItems: NavItem[] = [
   { href: '/app/reflection', label: '다짐/평가' },
   { href: '/app/cell', label: '우리 셀' },
   { href: '/app/shepherd', label: '목양' },
+  { href: '/app/settings', label: '설정' },
 ]
 
 export default function MobileNav({ isAdmin }: { isAdmin: boolean }) {
