@@ -11,6 +11,7 @@ import AdminShepherdManager from '@/app/app/admin/AdminShepherdManager'
 import TalentPolicyManager from '@/app/app/admin/TalentPolicyManager'
 import CommunitySettings from '@/app/app/admin/CommunitySettings'
 import RemoveMemberButton from '@/app/app/admin/RemoveMemberButton'
+import ChangeRoleButton from '@/app/app/admin/ChangeRoleButton'
 
 export default async function OperatorCommunityManagePage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
@@ -153,13 +154,19 @@ export default async function OperatorCommunityManagePage({ params }: { params: 
                         cells={cells || []}
                       />
                     </TableCell>
-                    <TableCell>
-                      {/* Operator can remove anyone, even admins? The RemoveMemberButton deletes membership. */}
-                      <RemoveMemberButton 
-                        membershipId={member.id} 
-                        memberName={(member.profile as any)?.name || '이름 없음'} 
-                      />
-                    </TableCell>
+                      <TableCell className="space-x-1">
+                        {member.role !== 'admin' && (
+                          <ChangeRoleButton
+                            membershipId={member.id}
+                            currentRole={member.role}
+                            memberName={(member.profile as any)?.name || '이름 없음'}
+                          />
+                        )}
+                        <RemoveMemberButton 
+                          membershipId={member.id} 
+                          memberName={(member.profile as any)?.name || '이름 없음'} 
+                        />
+                      </TableCell>
                   </TableRow>
                 )})}
               </TableBody>

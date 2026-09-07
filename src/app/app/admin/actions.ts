@@ -151,11 +151,16 @@ export async function changeMemberRole(membershipId: string, newRole: string) {
   if (!user) return { error: 'Unauthorized' };
   const { data: targetMembership } = await supabase.from('community_memberships').select('community_id, role').eq('id', membershipId).single();
   if (!targetMembership) return { error: '멤버를 찾을 수 없습니다.' };
-  const { data: myMembership } = await supabase.from('community_memberships').select('role').eq('user_id', user.id).eq('community_id', targetMembership.community_id).single();
-  if (myMembership?.role !== 'admin') return { error: '직책 임명/해제는 최고 관리자만 가능합니다.' };
+  
+  const { data: operatorData } = await supabase.from('system_operators').select('user_id').eq('user_id', user.id).maybeSingle();
+  const isOperator = !!operatorData;
+  
+  const { data: myMembership } = await supabase.from('community_memberships').select('role').eq('user_id', user.id).eq('community_id', targetMembership.community_id).maybeSingle();
+  if (myMembership?.role !== 'admin' && !isOperator) return { error: '직책 임명/해제는 최고 관리자 또는 운영자만 가능합니다.' };
   if (targetMembership.role === 'admin' && newRole !== 'admin') return { error: '최고 관리자의 직책은 변경할 수 없습니다.' };
   const { error } = await supabase.from('community_memberships').update({ role: newRole }).eq('id', membershipId);
   if (error) return { error: error.message };
   revalidatePath('/app/admin');
+  revalidatePath('/app/operator');
   return { success: true };
 }
