@@ -49,13 +49,14 @@ export default async function AppLayout({
             <Link href="/app/reflection" className="hover:text-primary">다짐/평가</Link>
             <Link href="/app/cell" className="hover:text-primary">우리 셀</Link>
             <Link href="/app/shepherd" className="hover:text-primary">목양</Link>
+            <Link href="/app/directory" className="hover:text-primary">주소록</Link>
             {membership?.role === 'admin' && (
               <Link href="/app/admin" className="text-primary hover:underline">관리자</Link>
             )}
             {isOperator && (
               <Link href="/app/operator" className="text-destructive font-bold hover:underline">👑 시스템 운영자</Link>
             )}
-            <Link href="/app/settings" className="hover:text-primary">설정</Link>
+            <Link href="/app/settings" className="hover:text-primary">내 정보</Link>
           </nav>
         </div>
         <div className="flex items-center gap-4">
