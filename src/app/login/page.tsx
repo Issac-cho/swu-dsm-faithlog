@@ -62,11 +62,18 @@ export default function LoginPage() {
             <Button className="w-full" type="submit" disabled={isPending}>
               {isPending ? '로그인 중...' : '로그인'}
             </Button>
-            <div className="text-sm text-center text-muted-foreground">
-              계정이 없으신가요?{' '}
-              <Link href="/signup" className="text-primary hover:underline">
-                회원가입
-              </Link>
+            <div className="flex flex-col items-center space-y-2 text-sm text-muted-foreground w-full">
+              <div>
+                계정이 없으신가요?{' '}
+                <Link href="/signup" className="text-primary hover:underline font-medium">
+                  회원가입
+                </Link>
+              </div>
+              <div className="pt-2 border-t w-full text-center">
+                <Link href="/install" className="text-primary hover:underline inline-flex items-center gap-1">
+                  <span>📱 앱 설치 가이드 보기</span>
+                </Link>
+              </div>
             </div>
           </CardFooter>
         </form>
