@@ -23,12 +23,12 @@ export async function leaveCommunity() {
   const { error } = await supabase
     .from('community_memberships')
     .delete()
-    .eq('id', membership.id)
+    .eq('user_id', user.id)
 
   if (error) return { error: error.message }
 
   revalidatePath('/', 'layout')
-  redirect('/app/community/join')
+  return { success: true, redirectUrl: '/app/community/join' }
 }
 
 export async function updateProfile(formData: FormData) {

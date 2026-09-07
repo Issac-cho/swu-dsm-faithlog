@@ -3,9 +3,11 @@
 import { Button } from '@/components/ui/button'
 import { leaveCommunity } from './actions'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function LeaveCommunityButton({ communityName }: { communityName: string }) {
   const [isPending, setIsPending] = useState(false)
+  const router = useRouter()
 
   const handleLeave = async () => {
     if (!confirm(`정말로 ${communityName} 공동체에서 탈퇴하시겠습니까?`)) return
@@ -16,6 +18,8 @@ export default function LeaveCommunityButton({ communityName }: { communityName:
       if (res?.error) {
         alert('오류가 발생했습니다: ' + res.error)
         setIsPending(false)
+      } else if (res?.success && res.redirectUrl) {
+        router.push(res.redirectUrl)
       }
     } catch (e: any) {
       alert('오류가 발생했습니다: ' + e.message)
