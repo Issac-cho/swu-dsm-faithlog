@@ -38,7 +38,7 @@ export default async function OperatorCommunityUsersPage({ params }: { params: P
   // Fetch all members with their profile and cell info
   const { data: members } = await supabase
     .from('community_memberships')
-    .select('id, user_id, role, created_at, cell:cells(name), profile:profiles(name, id)')
+    .select('id, user_id, role, created_at, cell:cells(name), profile:profiles(name, avatar_icon, id)')
     .eq('community_id', communityId)
     .order('created_at', { ascending: false })
 
@@ -67,9 +67,16 @@ export default async function OperatorCommunityUsersPage({ params }: { params: P
               </TableRow>
             </TableHeader>
             <TableBody>
-              {members?.map(member => (
+              {members?.map(member => {
+                const profile = member.profile as any
+                const name = profile?.name || '알 수 없음'
+                const avatar = profile?.avatar_icon || '👤'
+                return (
                 <TableRow key={member.id}>
-                  <TableCell className="font-medium">{(member.profile as any)?.name || '알 수 없음'}</TableCell>
+                  <TableCell className="font-medium flex items-center gap-2">
+                    <span className="text-xl">{avatar}</span>
+                    <span>{name}</span>
+                  </TableCell>
                   <TableCell>
                     {member.role === 'admin' ? (
                       <span className="text-primary font-bold bg-primary/10 px-2 py-1 rounded-md text-xs">관리자</span>
@@ -86,8 +93,8 @@ export default async function OperatorCommunityUsersPage({ params }: { params: P
                       조회 <ChevronRight className="w-4 h-4 ml-1" />
                     </Link>
                   </TableCell>
-                </TableRow>
-              ))}
+                  </TableRow>
+                )})}
               {members?.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">

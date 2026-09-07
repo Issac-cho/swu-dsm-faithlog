@@ -42,7 +42,8 @@ export default async function ReflectionPage() {
     .select(`
       *,
       profiles:user_id (
-        name
+        name,
+        avatar_icon
       )
     `)
     .eq('community_id', membership.community_id)
@@ -106,6 +107,7 @@ export default async function ReflectionPage() {
             const isMe = ref.user_id === user.id
             const profile = ref.profiles as any
             const name = profile?.name || '이름 없음'
+            const avatar = profile?.avatar_icon || '👤'
             
             // Skip rendering if both are empty
             if (!ref.commitment && !ref.review) return null
@@ -113,9 +115,9 @@ export default async function ReflectionPage() {
             return (
               <div key={ref.id} className={`flex gap-3 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
                 {/* Avatar */}
-                <Avatar className="w-10 h-10 border shrink-0">
-                  <AvatarFallback>{name.slice(0, 2)}</AvatarFallback>
-                </Avatar>
+                <div className="w-10 h-10 border rounded-full shrink-0 flex items-center justify-center bg-muted text-xl shadow-sm">
+                  {avatar}
+                </div>
 
                 {/* Message Content */}
                 <div className={`flex flex-col max-w-[80%] ${isMe ? 'items-end' : 'items-start'}`}>

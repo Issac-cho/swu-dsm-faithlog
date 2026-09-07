@@ -13,13 +13,13 @@ export default async function ShepherdPage() {
   // Fetch my sheep
   const { data: sheepRels } = await supabase
     .from('shepherd_relationships')
-    .select('sheep_id, profile:profiles!shepherd_relationships_sheep_id_fkey(name)')
+    .select('sheep_id, profile:profiles!shepherd_relationships_sheep_id_fkey(name, avatar_icon)')
     .eq('shepherd_id', user.id)
 
   // Fetch my shepherds
   const { data: shepherdRels } = await supabase
     .from('shepherd_relationships')
-    .select('shepherd_id, profile:profiles!shepherd_relationships_shepherd_id_fkey(name)')
+    .select('shepherd_id, profile:profiles!shepherd_relationships_shepherd_id_fkey(name, avatar_icon)')
     .eq('sheep_id', user.id)
 
   const hasSheep = sheepRels && sheepRels.length > 0
@@ -38,19 +38,26 @@ export default async function ShepherdPage() {
         <div className="grid gap-4">
           {!hasShepherds ? (
             <p className="text-muted-foreground text-sm">연결된 목자가 없습니다.</p>
-          ) : (
-            shepherdRels.map(rel => (
-              <Card key={rel.shepherd_id}>
-                <CardHeader>
-                  <CardTitle>{(rel.profile as any)?.name}</CardTitle>
-                  <CardDescription>
-                    <Link href={`/app/history?userId=${rel.shepherd_id}&date=${todayInKST}`} className="text-primary hover:underline">
-                      체크리스트 기록 보기
-                    </Link>
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            ))
+          ) : shepherdRels.map(rel => {
+                const profile = rel.profile as any
+                const name = profile?.name || '이름 없음'
+                const avatar = profile?.avatar_icon || '👤'
+                return (
+                  <Card key={rel.shepherd_id}>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <span className="text-2xl">{avatar}</span>
+                        <span>{name}</span>
+                      </CardTitle>
+                      <CardDescription>
+                        <Link href={`/app/history?userId=${rel.shepherd_id}&date=${todayInKST}`} className="text-primary hover:underline">
+                          체크리스트 기록 보기
+                        </Link>
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                )
+              })
           )}
         </div>
       </div>
@@ -60,19 +67,26 @@ export default async function ShepherdPage() {
         <div className="grid gap-4">
           {!hasSheep ? (
             <p className="text-muted-foreground text-sm">연결된 양이 없습니다.</p>
-          ) : (
-            sheepRels.map(rel => (
-              <Card key={rel.sheep_id}>
-                <CardHeader>
-                  <CardTitle>{(rel.profile as any)?.name}</CardTitle>
-                  <CardDescription>
-                    <Link href={`/app/history?userId=${rel.sheep_id}&date=${todayInKST}`} className="text-primary hover:underline">
-                      체크리스트 기록 보기
-                    </Link>
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            ))
+          ) : sheepRels.map(rel => {
+                const profile = rel.profile as any
+                const name = profile?.name || '이름 없음'
+                const avatar = profile?.avatar_icon || '👤'
+                return (
+                  <Card key={rel.sheep_id}>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <span className="text-2xl">{avatar}</span>
+                        <span>{name}</span>
+                      </CardTitle>
+                      <CardDescription>
+                        <Link href={`/app/history?userId=${rel.sheep_id}&date=${todayInKST}`} className="text-primary hover:underline">
+                          체크리스트 기록 보기
+                        </Link>
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                )
+              })
           )}
         </div>
       </div>

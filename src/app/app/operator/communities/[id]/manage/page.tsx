@@ -49,7 +49,7 @@ export default async function OperatorCommunityManagePage({ params }: { params: 
   // Fetch all members
   const { data: members } = await supabase
     .from('community_memberships')
-    .select('id, user_id, role, cell_id, profile:profiles(name)')
+    .select('id, user_id, role, cell_id, profile:profiles(name, avatar_icon)')
     .eq('community_id', communityId)
     .order('created_at', { ascending: true })
 
@@ -57,6 +57,7 @@ export default async function OperatorCommunityManagePage({ params }: { params: 
     id: m.id,
     user_id: m.user_id,
     name: (m.profile as any)?.name || '이름 없음',
+    avatar_icon: (m.profile as any)?.avatar_icon || '👤',
   })) || []
 
   const memberIds = flatMembers.map(m => m.user_id)
@@ -132,14 +133,19 @@ export default async function OperatorCommunityManagePage({ params }: { params: 
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {members?.map((member) => (
-                  <TableRow key={member.id}>
-                    <TableCell className="font-medium">
-                      {(member.profile as any)?.name || '이름 없음'}
-                    </TableCell>
-                    <TableCell>
-                      {member.role === 'admin' ? '관리자' : '일반 멤버'}
-                    </TableCell>
+                {members?.map((member) => {
+                  const profile = member.profile as any
+                  const name = profile?.name || '이름 없음'
+                  const avatar = profile?.avatar_icon || '👤'
+                  return (
+                    <TableRow key={member.id}>
+                      <TableCell className="font-medium flex items-center gap-2">
+                        <span className="text-xl">{avatar}</span>
+                        <span>{name}</span>
+                      </TableCell>
+                      <TableCell>
+                        {member.role === 'admin' ? '관리자' : '일반 멤버'}
+                      </TableCell>
                     <TableCell>
                       <CellAssigner
                         membershipId={member.id}
@@ -155,7 +161,7 @@ export default async function OperatorCommunityManagePage({ params }: { params: 
                       />
                     </TableCell>
                   </TableRow>
-                ))}
+                )})}
               </TableBody>
             </Table>
           </CardContent>

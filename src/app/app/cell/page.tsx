@@ -30,7 +30,7 @@ export default async function CellPage() {
   if (membership.cell_id) {
     const { data } = await supabase
       .from('community_memberships')
-      .select('user_id, profile:profiles(name)')
+      .select('user_id, profile:profiles(name, avatar_icon)')
       .eq('cell_id', membership.cell_id)
       
     members = data || []
@@ -74,12 +74,17 @@ export default async function CellPage() {
           ) : (
             members.map(member => {
               const userTalent = talentSums[member.user_id] || 0
+              const profile = member.profile as any
+              const name = profile?.name || '이름 없음'
+              const avatar = profile?.avatar_icon || '👤'
+
               return (
                 <Card key={member.user_id}>
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
-                      <CardTitle>
-                        {(member.profile as any)?.name}
+                      <CardTitle className="flex items-center gap-2">
+                        <span className="text-2xl">{avatar}</span>
+                        <span>{name}</span>
                         {member.user_id === user.id && <span className="text-sm font-normal text-muted-foreground ml-2">(나)</span>}
                       </CardTitle>
                       <CardDescription className="mt-1">

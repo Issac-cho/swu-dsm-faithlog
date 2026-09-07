@@ -30,3 +30,26 @@ export async function leaveCommunity() {
   revalidatePath('/', 'layout')
   redirect('/app/community/join')
 }
+
+export async function updateProfile(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized' }
+
+  const name = formData.get('name') as string
+  const avatarIcon = formData.get('avatarIcon') as string
+
+  if (!name || name.trim().length === 0) {
+    return { error: '이름을 입력해주세요.' }
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ name: name.trim(), avatar_icon: avatarIcon })
+    .eq('id', user.id)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/', 'layout')
+  return { success: true }
+}
