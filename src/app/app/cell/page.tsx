@@ -62,7 +62,7 @@ export default async function CellPage() {
         {membership.cell_id && (
           <div className="text-right">
             <span className="text-sm text-muted-foreground">우리 셀 총 달란트</span>
-            <div className="text-xl font-bold text-primary">{totalCellTalent.toLocaleString()} D</div>
+            <div className="text-xl font-bold text-primary">{totalCellTalent.toLocaleString()} T</div>
           </div>
         )}
       </div>
@@ -89,7 +89,7 @@ export default async function CellPage() {
                       </CardDescription>
                     </div>
                     <div className="text-lg font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
-                      {userTalent.toLocaleString()} D
+                      {userTalent.toLocaleString()} T
                     </div>
                   </CardHeader>
                 </Card>
