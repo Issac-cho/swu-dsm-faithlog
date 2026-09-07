@@ -53,16 +53,14 @@ export default function ProfileForm({
       <div className="flex flex-col items-center space-y-4">
         {/* Emoji Selector */}
         <Dialog open={isEmojiModalOpen} onOpenChange={setIsEmojiModalOpen}>
-          <DialogTrigger asChild>
-            <button 
-              type="button" 
-              className="w-24 h-24 text-5xl bg-muted rounded-full flex items-center justify-center hover:ring-4 hover:ring-primary/20 transition-all cursor-pointer shadow-sm relative group"
-            >
-              {avatarIcon}
-              <div className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="text-white text-xs font-bold">변경</span>
-              </div>
-            </button>
+          <DialogTrigger 
+            render={<button type="button" />}
+            className="w-24 h-24 text-5xl bg-muted rounded-full flex items-center justify-center hover:ring-4 hover:ring-primary/20 transition-all cursor-pointer shadow-sm relative group"
+          >
+            {avatarIcon}
+            <div className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <span className="text-white text-xs font-bold">변경</span>
+            </div>
           </DialogTrigger>
           <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
             <DialogHeader>

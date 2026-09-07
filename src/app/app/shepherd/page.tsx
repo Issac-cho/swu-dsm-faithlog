@@ -58,7 +58,7 @@ export default async function ShepherdPage() {
                   </Card>
                 )
               })
-          )}
+          }
         </div>
       </div>
 
@@ -87,7 +87,7 @@ export default async function ShepherdPage() {
                   </Card>
                 )
               })
-          )}
+          }
         </div>
       </div>
     </div>

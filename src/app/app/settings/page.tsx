@@ -91,7 +91,7 @@ export default async function SettingsPage() {
             <CardDescription>공동체에서 탈퇴하면 관련된 모든 정보(목양, 달란트 등)가 초기화될 수 있습니다.</CardDescription>
           </CardHeader>
           <CardContent>
-            <LeaveCommunityButton />
+            <LeaveCommunityButton communityName={(membership.community as any)?.name || '공동체'} />
           </CardContent>
         </Card>
       )}
