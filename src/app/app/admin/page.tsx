@@ -30,7 +30,7 @@ export default async function AdminPage() {
     .limit(1)
     .single()
 
-  if (!myMembership || myMembership.role !== 'admin') {
+  if (!myMembership || !['admin', 'sub_admin'].includes(myMembership.role)) {
     return (
       <div className="p-4 md:p-6 text-center text-destructive">
         관리자 권한이 없습니다.

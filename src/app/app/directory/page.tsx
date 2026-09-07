@@ -56,10 +56,15 @@ export default async function DirectoryPage() {
                 </div>
                 <div>
                   <div className="font-bold">{name}</div>
-                  <div className="text-xs text-muted-foreground flex items-center justify-center gap-1 mt-1">
+                  <div className="text-xs text-muted-foreground flex flex-wrap items-center justify-center gap-1 mt-1">
                     {member.role === 'admin' && (
                       <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded text-[10px] font-bold">
                         관리자
+                      </span>
+                    )}
+                    {member.role === 'sub_admin' && (
+                      <span className="bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded text-[10px] font-semibold">
+                        부관리자
                       </span>
                     )}
                     <span>{cellName || '셀 미배정'}</span>

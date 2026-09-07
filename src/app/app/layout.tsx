@@ -32,6 +32,8 @@ export default async function AppLayout({
     .from('community_memberships')
     .select('*, community:communities(name), cell:cells(name)')
     .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
     .single()
 
   return (
