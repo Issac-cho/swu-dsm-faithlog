@@ -81,7 +81,7 @@ export default async function HistoryPage({
   // Check my membership (to ensure I'm logged in and in a community)
   const { data: membership } = await supabase
     .from('community_memberships')
-    .select('id')
+    .select('community_id')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -96,6 +96,7 @@ export default async function HistoryPage({
     .from('checklist_items')
     .select('id, name, type, is_active, created_at, updated_at, sort_order')
     .eq('user_id', queryUserId)
+    .eq('community_id', membership.community_id)
     .order('sort_order', { ascending: true })
 
   const headers = ['S', 'M', 'T', 'W', 'T', 'F', 'S']

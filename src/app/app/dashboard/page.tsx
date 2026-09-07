@@ -30,12 +30,16 @@ export default async function DashboardPage() {
     .from('checklist_items')
     .select('id')
     .eq('user_id', user.id)
+    .eq('community_id', membership.community_id)
     .eq('is_active', true)
+
+  const itemIds = items?.map(i => i.id) || []
 
   const { data: todayRecords } = await supabase
     .from('checklist_records')
     .select('id')
     .eq('user_id', user.id)
+    .in('checklist_item_id', itemIds.length > 0 ? itemIds : ['00000000-0000-0000-0000-000000000000'])
     .eq('record_date', todayInKST)
     .eq('completed', true)
 
