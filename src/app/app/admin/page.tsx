@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import Link from 'next/link'
 import { createCell } from './actions'
 import CellAssigner from './CellAssigner'
 import AdminShepherdManager from './AdminShepherdManager'
@@ -129,6 +130,7 @@ export default async function AdminPage() {
                   <TableHead>이름</TableHead>
                   <TableHead>권한</TableHead>
                   <TableHead>소속 셀</TableHead>
+                  <TableHead>조회</TableHead>
                   <TableHead>관리</TableHead>
                 </TableRow>
               </TableHeader>
@@ -146,23 +148,28 @@ export default async function AdminPage() {
                       <TableCell>
                         {member.role === 'admin' ? '관리자' : '일반 멤버'}
                       </TableCell>
-                    <TableCell>
-                      <CellAssigner
-                        membershipId={member.id}
-                        currentCellId={member.cell_id}
-                        cells={cells || []}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {member.role !== 'admin' && (
-                        <RemoveMemberButton 
-                          membershipId={member.id} 
-                          memberName={(member.profile as any)?.name || '이름 없음'} 
+                      <TableCell>
+                        <CellAssigner
+                          membershipId={member.id}
+                          currentCellId={member.cell_id}
+                          cells={cells || []}
                         />
-                      )}
-                    </TableCell>
-                  </TableRow>
-                )})}
+                      </TableCell>
+                      <TableCell>
+                        <Link href={`/app/history?userId=${member.user_id}`} className="text-primary hover:underline text-sm font-medium">
+                          기록 보기
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        {member.role !== 'admin' && (
+                          <RemoveMemberButton 
+                            membershipId={member.id} 
+                            memberName={(member.profile as any)?.name || '이름 없음'} 
+                          />
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  )})}
               </TableBody>
             </Table>
           </CardContent>
