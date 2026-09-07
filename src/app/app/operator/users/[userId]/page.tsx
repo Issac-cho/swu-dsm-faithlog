@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import Link from 'next/link'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
@@ -58,13 +58,9 @@ export default async function OperatorUserDetailPage({ params, searchParams }: {
     <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
       <div className="flex items-center gap-4 mb-4">
         {communityId ? (
-          <Button variant="outline" asChild size="sm">
-            <Link href={`/app/operator/communities/${communityId}/users`}>← 유저 목록</Link>
-          </Button>
+          <Link href={`/app/operator/communities/${communityId}/users`} className={buttonVariants({ variant: "outline", size: "sm" })}>← 유저 목록</Link>
         ) : (
-          <Button variant="outline" asChild size="sm">
-            <Link href="/app/operator">← 운영자 홈</Link>
-          </Button>
+          <Link href="/app/operator" className={buttonVariants({ variant: "outline", size: "sm" })}>← 운영자 홈</Link>
         )}
       </div>
 

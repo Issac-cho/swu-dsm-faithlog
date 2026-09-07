@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import Link from 'next/link'
 import { Users, LayoutGrid, ShieldAlert, Activity } from 'lucide-react'
 
@@ -99,16 +99,12 @@ export default async function OperatorHomePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex gap-2">
-                <Button variant="outline" className="flex-1" asChild>
-                  <Link href={`/app/operator/communities/${community.id}/users`}>
-                    👥 유저 조회
-                  </Link>
-                </Button>
-                <Button variant="destructive" className="flex-1" asChild>
-                  <Link href={`/app/operator/communities/${community.id}/manage`}>
-                    ⚙️ 강제 통제
-                  </Link>
-                </Button>
+                <Link href={`/app/operator/communities/${community.id}/users`} className={buttonVariants({ variant: "outline", className: "flex-1" })}>
+                  👥 유저 조회
+                </Link>
+                <Link href={`/app/operator/communities/${community.id}/manage`} className={buttonVariants({ variant: "destructive", className: "flex-1" })}>
+                  ⚙️ 강제 통제
+                </Link>
               </CardContent>
             </Card>
           ))}

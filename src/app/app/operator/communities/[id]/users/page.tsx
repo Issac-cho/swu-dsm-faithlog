@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import Link from 'next/link'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ChevronRight } from 'lucide-react'
@@ -44,9 +44,9 @@ export default async function OperatorCommunityUsersPage({ params }: { params: {
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
       <div className="flex items-center gap-4 mb-4">
-        <Button variant="outline" asChild size="sm">
-          <Link href="/app/operator">← 운영자 홈</Link>
-        </Button>
+        <Link href="/app/operator" className={buttonVariants({ variant: "outline", size: "sm" })}>
+          ← 운영자 홈
+        </Link>
         <div>
           <h1 className="text-2xl font-bold">{community.name} - 유저 목록</h1>
           <p className="text-muted-foreground">총 {members?.length || 0}명의 유저가 소속되어 있습니다.</p>
@@ -81,11 +81,9 @@ export default async function OperatorCommunityUsersPage({ params }: { params: {
                     {new Date(member.created_at).toLocaleDateString()}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/app/operator/users/${member.user_id}?communityId=${communityId}`}>
-                        조회 <ChevronRight className="w-4 h-4 ml-1" />
-                      </Link>
-                    </Button>
+                    <Link href={`/app/operator/users/${member.user_id}?communityId=${communityId}`} className={buttonVariants({ variant: "ghost", size: "sm" })}>
+                      조회 <ChevronRight className="w-4 h-4 ml-1" />
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))}

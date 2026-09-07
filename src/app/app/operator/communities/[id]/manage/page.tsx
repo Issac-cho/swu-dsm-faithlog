@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import Link from 'next/link'
@@ -79,9 +79,9 @@ export default async function OperatorCommunityManagePage({ params }: { params: 
   return (
     <div className="p-4 md:p-6 space-y-8 max-w-5xl mx-auto">
       <div className="flex items-center gap-4 mb-4">
-        <Button variant="outline" asChild size="sm">
-          <Link href="/app/operator">← 운영자 홈</Link>
-        </Button>
+        <Link href="/app/operator" className={buttonVariants({ variant: "outline", size: "sm" })}>
+          ← 운영자 홈
+        </Link>
         <div>
           <h1 className="text-2xl font-bold">{communityInfo.name} - 강제 통제 모드</h1>
           <p className="text-destructive font-medium text-sm">운영자 권한으로 외부에서 공동체 설정을 직접 변경 중입니다.</p>
