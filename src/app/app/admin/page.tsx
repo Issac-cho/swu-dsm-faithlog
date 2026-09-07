@@ -11,6 +11,7 @@ import AdminShepherdManager from './AdminShepherdManager'
 import TalentPolicyManager from './TalentPolicyManager'
 import CommunitySettings from './CommunitySettings'
 import RemoveMemberButton from './RemoveMemberButton'
+import ChangeRoleButton from './ChangeRoleButton'
 
 export default async function AdminPage() {
   const supabase = await createClient()
@@ -146,7 +147,11 @@ export default async function AdminPage() {
                         <span>{name}</span>
                       </TableCell>
                       <TableCell>
-                        {member.role === 'admin' ? '관리자' : '일반 멤버'}
+                        {member.role === 'admin' ? (
+                          <span className="font-bold text-primary">관리자</span>
+                        ) : member.role === 'sub_admin' ? (
+                          <span className="font-semibold text-blue-600">부관리자</span>
+                        ) : '일반 멤버'}
                       </TableCell>
                       <TableCell>
                         <CellAssigner
@@ -160,11 +165,18 @@ export default async function AdminPage() {
                           기록 보기
                         </Link>
                       </TableCell>
-                      <TableCell>
-                        {member.role !== 'admin' && (
+                      <TableCell className="space-x-1">
+                        {myMembership.role === 'admin' && member.role !== 'admin' && (
+                          <ChangeRoleButton
+                            membershipId={member.id}
+                            currentRole={member.role}
+                            memberName={name}
+                          />
+                        )}
+                        {(myMembership.role === 'admin' || member.role === 'member') && member.role !== 'admin' && (
                           <RemoveMemberButton 
                             membershipId={member.id} 
-                            memberName={(member.profile as any)?.name || '이름 없음'} 
+                            memberName={name} 
                           />
                         )}
                       </TableCell>

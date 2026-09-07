@@ -143,9 +143,9 @@ export default async function OperatorCommunityManagePage({ params }: { params: 
                         <span className="text-xl">{avatar}</span>
                         <span>{name}</span>
                       </TableCell>
-                      <TableCell>
-                        {member.role === 'admin' ? '관리자' : '일반 멤버'}
-                      </TableCell>
+                        <TableCell>
+                          {member.role === 'admin' ? '관리자' : member.role === 'sub_admin' ? '부관리자' : '일반 멤버'}
+                        </TableCell>
                     <TableCell>
                       <CellAssigner
                         membershipId={member.id}

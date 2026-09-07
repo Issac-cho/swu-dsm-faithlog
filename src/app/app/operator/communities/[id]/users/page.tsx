@@ -80,8 +80,10 @@ export default async function OperatorCommunityUsersPage({ params }: { params: P
                   <TableCell>
                     {member.role === 'admin' ? (
                       <span className="text-primary font-bold bg-primary/10 px-2 py-1 rounded-md text-xs">관리자</span>
+                    ) : member.role === 'sub_admin' ? (
+                      <span className="text-blue-600 font-semibold bg-blue-100 px-2 py-1 rounded-md text-xs">부관리자</span>
                     ) : (
-                      <span className="text-muted-foreground">일반</span>
+                      <span className="text-muted-foreground text-sm">일반 멤버</span>
                     )}
                   </TableCell>
                   <TableCell>{(member.cell as any)?.name || '-'}</TableCell>

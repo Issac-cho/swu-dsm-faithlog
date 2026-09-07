@@ -1,4 +1,4 @@
-﻿'use server'
+'use server'
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
@@ -23,7 +23,7 @@ export async function createCell(formData: FormData) {
     .eq('community_id', communityId)
     .single()
 
-  if (membership?.role !== 'admin') {
+  if (!['admin', 'sub_admin'].includes(membership?.role)) {
     return { error: '관리자 권한이 없습니다.' }
   }
 
@@ -61,7 +61,7 @@ export async function assignUserToCell(membershipId: string, cellId: string | nu
     .eq('community_id', targetMembership.community_id)
     .single()
 
-  if (myMembership?.role !== 'admin') {
+  if (!['admin', 'sub_admin'].includes(myMembership?.role)) {
     return { error: '관리자 권한이 없습니다.' }
   }
 
@@ -122,7 +122,7 @@ export async function updateCommunityPassword(formData: FormData) {
     .eq('community_id', communityId)
     .single()
 
-  if (membership?.role !== 'admin') {
+  if (!['admin', 'sub_admin'].includes(membership?.role)) {
     return { error: '관리자 권한이 없습니다.' }
   }
 
@@ -142,4 +142,20 @@ export async function removeMember(membershipId: string) {
   const { error } = await supabase.from('community_memberships').delete().eq('id', membershipId)
   if (error) throw new Error(error.message)
   revalidatePath('/', 'layout')
+}
+
+
+export async function changeMemberRole(membershipId: string, newRole: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'Unauthorized' };
+  const { data: targetMembership } = await supabase.from('community_memberships').select('community_id, role').eq('id', membershipId).single();
+  if (!targetMembership) return { error: '멤버를 찾을 수 없습니다.' };
+  const { data: myMembership } = await supabase.from('community_memberships').select('role').eq('user_id', user.id).eq('community_id', targetMembership.community_id).single();
+  if (myMembership?.role !== 'admin') return { error: '직책 임명/해제는 최고 관리자만 가능합니다.' };
+  if (targetMembership.role === 'admin' && newRole !== 'admin') return { error: '최고 관리자의 직책은 변경할 수 없습니다.' };
+  const { error } = await supabase.from('community_memberships').update({ role: newRole }).eq('id', membershipId);
+  if (error) return { error: error.message };
+  revalidatePath('/app/admin');
+  return { success: true };
 }

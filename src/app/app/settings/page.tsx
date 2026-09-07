@@ -68,7 +68,9 @@ export default async function SettingsPage() {
                 <Shield className="w-6 h-6 text-primary" />
                 <div>
                   <p className="text-xs text-muted-foreground font-semibold">직책</p>
-                  <p className="font-bold">{membership.role === 'admin' ? '관리자' : '일반'}</p>
+                  <p className="font-bold">
+                    {membership.role === 'admin' ? '관리자' : membership.role === 'sub_admin' ? '부관리자' : '일반'}
+                  </p>
                 </div>
               </div>
               

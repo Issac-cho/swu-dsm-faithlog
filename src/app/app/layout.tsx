@@ -50,7 +50,7 @@ export default async function AppLayout({
             <Link href="/app/cell" className="hover:text-primary">우리 셀</Link>
             <Link href="/app/shepherd" className="hover:text-primary">목양</Link>
             <Link href="/app/directory" className="hover:text-primary">주소록</Link>
-            {membership?.role === 'admin' && (
+            {['admin', 'sub_admin'].includes(membership?.role) && (
               <Link href="/app/admin" className="text-primary hover:underline">관리자</Link>
             )}
             {isOperator && (
@@ -63,7 +63,7 @@ export default async function AppLayout({
           <div className="text-sm text-muted-foreground hidden sm:block">
             {membership ? `${membership.community?.name} ${membership.cell?.name || '(셀 미배정)'}` : '소속 없음'}
           </div>
-          <MobileNav isAdmin={membership?.role === 'admin'} isOperator={isOperator} />
+          <MobileNav isAdmin={['admin', 'sub_admin'].includes(membership?.role)} isOperator={isOperator} />
           <form action={logout}>
             <Button variant="ghost" size="sm" type="submit">
               로그아웃
