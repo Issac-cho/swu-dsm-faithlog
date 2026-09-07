@@ -1,5 +1,5 @@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import Link from 'next/link'
 
 export default function InstallGuidePage() {
@@ -49,11 +49,9 @@ export default function InstallGuidePage() {
         </Card>
 
         <div className="flex justify-center pt-4">
-          <Button asChild className="w-full md:w-auto px-12">
-            <Link href="/login">
-              로그인 화면으로 돌아가기
-            </Link>
-          </Button>
+          <Link href="/login" className={buttonVariants({ className: "w-full md:w-auto px-12" })}>
+            로그인 화면으로 돌아가기
+          </Link>
         </div>
       </div>
     </div>
