@@ -32,6 +32,7 @@ export default async function DashboardPage() {
     .eq('user_id', user.id)
     .eq('community_id', membership.community_id)
     .eq('is_active', true)
+    .is('deleted_at', null)
 
   const itemIds = items?.map(i => i.id) || []
 
@@ -67,6 +68,7 @@ export default async function DashboardPage() {
     .eq('user_id', user.id)
     .eq('community_id', membership.community_id)
     .eq('week_start_date', weekStartStr)
+    .is('deleted_at', null)
     .single()
 
   return (

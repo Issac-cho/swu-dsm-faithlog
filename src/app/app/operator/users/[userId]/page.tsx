@@ -40,22 +40,30 @@ export default async function OperatorUserDetailPage({ params, searchParams }: {
     .eq('user_id', targetUserId)
 
   // Fetch Talent Transactions
-  const { data: talentTx } = await supabase
+  let talentQuery = supabase
     .from('talent_transactions')
     .select('amount, reason, created_at')
     .eq('user_id', targetUserId)
-    .order('created_at', { ascending: false })
-    .limit(50)
+    
+  if (communityId) {
+    talentQuery = talentQuery.eq('community_id', communityId)
+  }
+
+  const { data: talentTx } = await talentQuery.order('created_at', { ascending: false }).limit(50)
 
   const totalTalent = talentTx?.reduce((acc, curr) => acc + curr.amount, 0) || 0
 
   // Fetch Weekly Reflections
-  const { data: reflections } = await supabase
+  let reflectionQuery = supabase
     .from('weekly_reflections')
-    .select('content_commit, content_review, created_at, week_start_date')
+    .select('week_start_date, content, commitment, updated_at')
     .eq('user_id', targetUserId)
-    .order('week_start_date', { ascending: false })
-    .limit(10)
+
+  if (communityId) {
+    reflectionQuery = reflectionQuery.eq('community_id', communityId)
+  }
+
+  const { data: reflections } = await reflectionQuery.order('week_start_date', { ascending: false }).limit(10)
 
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto">

@@ -97,6 +97,7 @@ export default async function HistoryPage({
     .select('id, name, type, is_active, created_at, updated_at, sort_order')
     .eq('user_id', queryUserId)
     .eq('community_id', membership.community_id)
+    .is('deleted_at', null)
     .order('sort_order', { ascending: true })
 
   const headers = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
@@ -121,6 +122,7 @@ export default async function HistoryPage({
     .from('checklist_records')
     .select('checklist_item_id, record_date, completed')
     .eq('user_id', queryUserId)
+    .is('deleted_at', null)
     .gte('record_date', weekDaysStr[0])
     .lte('record_date', weekDaysStr[6])
 
@@ -146,6 +148,7 @@ export default async function HistoryPage({
     .from('checklist_records')
     .select('checklist_item_id, record_date, completed')
     .eq('user_id', queryUserId)
+    .is('deleted_at', null)
     .gte('record_date', format(calendarStart, 'yyyy-MM-dd'))
     .lte('record_date', format(calendarEnd, 'yyyy-MM-dd'))
 

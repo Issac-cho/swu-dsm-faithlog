@@ -39,6 +39,7 @@ export default async function ChecklistPage({
     .eq('user_id', user.id)
     .eq('community_id', membership.community_id)
     .eq('is_active', true)
+    .is('deleted_at', null)
     .order('sort_order', { ascending: true })
 
   // Get records for the selected date

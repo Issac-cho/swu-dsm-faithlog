@@ -12,12 +12,38 @@ export async function leaveCommunity() {
   // Fetch user's membership
   const { data: membership } = await supabase
     .from('community_memberships')
-    .select('id, role')
+    .select('id, role, community_id')
     .eq('user_id', user.id)
     .single()
 
   if (!membership) return { error: 'Not in a community' }
   if (membership.role === 'admin') return { error: '관리자는 공동체를 탈퇴할 수 없습니다.' }
+
+  const communityId = membership.community_id;
+
+  // Soft delete checklist items
+  await supabase
+    .from('checklist_items')
+    .update({ deleted_at: new Date().toISOString(), is_active: false })
+    .eq('user_id', user.id)
+    .eq('community_id', communityId)
+    .is('deleted_at', null);
+
+  // Soft delete talent_transactions
+  await supabase
+    .from('talent_transactions')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('user_id', user.id)
+    .eq('community_id', communityId)
+    .is('deleted_at', null);
+
+  // Soft delete weekly_reflections
+  await supabase
+    .from('weekly_reflections')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('user_id', user.id)
+    .eq('community_id', communityId)
+    .is('deleted_at', null);
 
   // Delete membership
   const { error } = await supabase
