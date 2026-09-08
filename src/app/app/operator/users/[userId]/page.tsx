@@ -118,8 +118,8 @@ export default async function OperatorUserDetailPage({ params, searchParams }: {
               reflections?.map((r, i) => (
                 <div key={i} className="bg-muted p-3 rounded-lg text-sm space-y-2">
                   <div className="font-bold text-xs text-muted-foreground">{r.week_start_date} 주간</div>
-                  {r.content_commit && <div><span className="font-semibold">다짐:</span> {r.content_commit}</div>}
-                  {r.content_review && <div className="text-primary"><span className="font-semibold">평가:</span> {r.content_review}</div>}
+                  {r.commitment && <div><span className="font-semibold">다짐:</span> {r.commitment}</div>}
+                  {r.content && <div className="text-primary"><span className="font-semibold">회고:</span> {r.content}</div>}
                 </div>
               ))
             )}
