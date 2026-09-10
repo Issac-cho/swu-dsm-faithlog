@@ -120,15 +120,15 @@ export default async function HistoryPage({
 
   const { data: weekRecords } = await supabase
     .from('checklist_records')
-    .select('checklist_item_id, record_date, completed')
+    .select('checklist_item_id, record_date, completed, memo')
     .eq('user_id', queryUserId)
     .is('deleted_at', null)
     .gte('record_date', weekDaysStr[0])
     .lte('record_date', weekDaysStr[6])
 
-  const weeklyRecordMap = new Map<string, boolean>()
+  const weeklyRecordMap = new Map<string, { completed: boolean, memo?: string }>()
   weekRecords?.forEach(record => {
-    weeklyRecordMap.set(`${record.checklist_item_id}-${record.record_date}`, record.completed)
+    weeklyRecordMap.set(`${record.checklist_item_id}-${record.record_date}`, { completed: record.completed, memo: record.memo })
   })
 
   // --- MONTHLY TAB LOGIC ---
@@ -269,27 +269,38 @@ export default async function HistoryPage({
                   </thead>
                   <tbody>
                     {activeWeeklyItems.map(item => (
-                      <tr key={item.id}>
-                        <td className="border p-2 font-medium text-sm text-center">{item.name}</td>
-                        {weekDaysStr.map(dateStr => {
-                          const completed = weeklyRecordMap.get(`${item.id}-${dateStr}`)
-                          const isPast = dateStr < todayInKST
+                        <tr key={item.id}>
+                          <td className="border p-2 font-medium text-sm text-center">{item.name}</td>
+                          {weekDaysStr.map(dateStr => {
+                            const record = weeklyRecordMap.get(`${item.id}-${dateStr}`)
+                            const isCompleted = record?.completed
+                            const isPast = dateStr < todayInKST
 
-                          let cellContent = ''
-                          if (completed) {
-                            cellContent = 'o'
-                          } else if (isPast) {
-                            cellContent = 'x'
-                          }
+                            let cellContent: React.ReactNode = null
+                            if (isCompleted) {
+                              if (record.memo) {
+                                cellContent = (
+                                  <div className="group relative inline-block cursor-help">
+                                    <span className="text-green-600 font-bold border-b border-dashed border-green-600">o</span>
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block z-10 w-max max-w-[200px] bg-popover text-popover-foreground text-xs p-2 rounded shadow-md border whitespace-normal text-left font-normal">
+                                      {record.memo}
+                                    </div>
+                                  </div>
+                                )
+                              } else {
+                                cellContent = <span className="text-green-600 font-bold">o</span>
+                              }
+                            } else if (isPast) {
+                              cellContent = <span className="text-red-500 font-medium">x</span>
+                            }
 
-                          return (
-                            <td key={dateStr} className="border p-2 text-center font-medium">
-                              {cellContent === 'o' && <span className="text-green-600">o</span>}
-                              {cellContent === 'x' && <span className="text-red-500">x</span>}
-                            </td>
-                          )
-                        })}
-                      </tr>
+                            return (
+                              <td key={dateStr} className="border p-2 text-center align-middle">
+                                {cellContent}
+                              </td>
+                            )
+                          })}
+                        </tr>
                     ))}
                     {activeWeeklyItems.length === 0 && (
                       <tr>
