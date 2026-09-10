@@ -47,40 +47,41 @@ export default function ChecklistItemComponent({
   }
 
   return (
-    <div className="flex flex-col space-y-2 p-3 rounded-md hover:bg-muted/50 transition-colors">
-      <div className="flex items-center space-x-3">
+    <div className="flex items-center p-3 rounded-md hover:bg-muted/50 transition-colors">
+      <div className="flex items-center space-x-3 flex-1 min-w-0">
         <Checkbox
           id={item.id}
           checked={optimisticCompleted}
           onCheckedChange={handleCheckedChange}
           disabled={isPending}
-          className="w-6 h-6"
+          className="w-6 h-6 shrink-0"
         />
         <label
           htmlFor={item.id}
-          className={`text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
+          className={`text-base font-medium leading-none shrink-0 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
             optimisticCompleted ? 'text-muted-foreground line-through' : ''
           }`}
         >
           {item.name}
         </label>
-        {item.type === 'CUSTOM' && (
-          <span className="text-[10px] bg-secondary text-secondary-foreground px-2 py-0.5 rounded-full ml-auto">
-            커스텀
-          </span>
+
+        {item.name === '통독' && (
+          <div className="flex-1 px-2 min-w-0">
+            <Input
+              placeholder="ex) 창세기 1~3장"
+              value={memo}
+              onChange={handleMemoChange}
+              className="h-8 text-xs bg-background/50 w-full"
+              disabled={isPending}
+            />
+          </div>
         )}
       </div>
 
-      {item.name === '통독' && (
-        <div className="pl-9 pr-2">
-          <Input
-            placeholder="ex) 창세기 1~3장"
-            value={memo}
-            onChange={handleMemoChange}
-            className="h-8 text-sm bg-background/50"
-            disabled={isPending}
-          />
-        </div>
+      {item.type === 'CUSTOM' && (
+        <span className="text-[10px] bg-secondary text-secondary-foreground px-2 py-0.5 rounded-full shrink-0 ml-2">
+          커스텀
+        </span>
       )}
     </div>
   )
