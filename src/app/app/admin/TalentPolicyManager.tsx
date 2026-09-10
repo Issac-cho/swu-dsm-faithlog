@@ -53,34 +53,39 @@ export default function TalentPolicyManager({ policies }: { policies: Policy[] }
               </TableRow>
             </TableHeader>
             <TableBody>
-              {policies.map(policy => (
-                <TableRow key={policy.id}>
-                  <TableCell className="font-medium">{policy.checklist_name}</TableCell>
-                  <TableCell>
-                    {editingId === policy.id ? (
-                      <Input 
-                        type="number" 
-                        value={editAmount} 
-                        onChange={(e) => setEditAmount(Number(e.target.value))}
-                        className="w-24"
-                        min={0}
-                      />
-                    ) : (
-                      <span>{policy.talent_amount}</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {editingId === policy.id ? (
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={() => handleSave(policy.id)} disabled={isPending}>저장</Button>
-                        <Button size="sm" variant="outline" onClick={() => setEditingId(null)} disabled={isPending}>취소</Button>
-                      </div>
-                    ) : (
-                      <Button size="sm" variant="secondary" onClick={() => handleEditClick(policy)}>수정</Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
+              {policies.map(policy => {
+                const displayName = policy.checklist_name === 'PERFECT_WEEK_BONUS' 
+                  ? '주간 올체크 보상' 
+                  : policy.checklist_name;
+                
+                return (
+                  <TableRow key={policy.id}>
+                    <TableCell className="font-medium">{displayName}</TableCell>
+                    <TableCell>
+                      {editingId === policy.id ? (
+                        <Input 
+                          type="number" 
+                          value={editAmount} 
+                          onChange={(e) => setEditAmount(parseInt(e.target.value) || 0)}
+                          className="w-24"
+                        />
+                      ) : (
+                        <span>{policy.talent_amount} T</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {editingId === policy.id ? (
+                        <div className="space-x-2">
+                          <Button size="sm" onClick={() => handleSave(policy.id)} disabled={isPending}>저장</Button>
+                          <Button size="sm" variant="outline" onClick={() => setEditingId(null)} disabled={isPending}>취소</Button>
+                        </div>
+                      ) : (
+                        <Button size="sm" variant="outline" onClick={() => handleEditClick(policy)}>수정</Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
             </TableBody>
           </Table>
         )}
