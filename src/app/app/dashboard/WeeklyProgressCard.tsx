@@ -81,7 +81,7 @@ export default async function WeeklyProgressCard({ userId, communityId }: { user
   const roundedPercentage = Math.round(progress.percentage)
 
   return (
-    <Card className="flex flex-col border-primary/20 bg-primary/5">
+    <Card className="flex flex-col">
       <CardHeader>
         <CardTitle>주간 달성률 (올체크 도전!)</CardTitle>
         <CardDescription>{weekDaysStr[0]} ~ {weekDaysStr[6]}</CardDescription>

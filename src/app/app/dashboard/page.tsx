@@ -81,8 +81,6 @@ export default async function DashboardPage() {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
-        <WeeklyProgressCard userId={user.id} communityId={membership.community_id} />
-
         {/* 오늘 체크리스트 요약 */}
         <Card className="flex flex-col">
           <CardHeader>
@@ -107,6 +105,8 @@ export default async function DashboardPage() {
             </Link>
           </CardContent>
         </Card>
+
+        <WeeklyProgressCard userId={user.id} communityId={membership.community_id} />
 
         {/* 이번 주 다짐 */}
         <Card className="flex flex-col">
