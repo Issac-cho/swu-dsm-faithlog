@@ -1,6 +1,6 @@
 'use client'
 
-import { useTransition, useOptimistic, useState, useEffect, useRef } from 'react'
+import { useTransition, useOptimistic, useState, useEffect } from 'react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { toggleRecord, updateRecordMemo } from './actions'
@@ -21,22 +21,19 @@ export default function ChecklistItemComponent({
   )
 
   const [memo, setMemo] = useState(record?.memo || '')
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     setMemo(record?.memo || '')
   }, [record?.memo])
 
-  const handleMemoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value
-    setMemo(val)
-    
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    timeoutRef.current = setTimeout(() => {
-      startTransition(async () => {
-        await updateRecordMemo(item.id, date, val)
-      })
-    }, 500)
+  const handleMemoBlur = () => {
+    const trimmed = memo.trim()
+    // Only save if the value actually changed from what's in the DB
+    if (trimmed === (record?.memo || '').trim()) return
+
+    startTransition(async () => {
+      await updateRecordMemo(item.id, date, trimmed)
+    })
   }
 
   const handleCheckedChange = (checked: boolean) => {
@@ -70,9 +67,9 @@ export default function ChecklistItemComponent({
             <Input
               placeholder="ex) 창세기 1~3장"
               value={memo}
-              onChange={handleMemoChange}
+              onChange={(e) => setMemo(e.target.value)}
+              onBlur={handleMemoBlur}
               className="h-8 text-xs bg-background/50 w-full"
-              disabled={isPending}
             />
           </div>
         )}

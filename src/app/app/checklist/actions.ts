@@ -79,7 +79,7 @@ export async function updateRecordMemo(itemId: string, date: string, memo: strin
     if (error) return { error: error.message }
   }
 
-  revalidatePath('/app/checklist')
+  // Only revalidate history — local state handles the checklist UI without a re-render
   revalidatePath('/app/history')
   return { success: true }
 }
