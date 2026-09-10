@@ -2,25 +2,23 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { startOfWeek, format } from 'date-fns'
+import { subDays, format } from 'date-fns'
 import { formatInTimeZone } from 'date-fns-tz'
 
-function isDateInCurrentWeek(dateStr: string): boolean {
+function isDateWithinSevenDays(dateStr: string): boolean {
   const today = new Date()
   const todayInKST = formatInTimeZone(today, 'Asia/Seoul', 'yyyy-MM-dd')
   
   const [year, month, day] = todayInKST.split('-').map(Number)
   const localToday = new Date(year, month - 1, day)
-  
-  const weekStart = startOfWeek(localToday, { weekStartsOn: 0 })
-  const weekStartStr = format(weekStart, 'yyyy-MM-dd')
+  const minDateStr = format(subDays(localToday, 6), 'yyyy-MM-dd')
 
-  return dateStr >= weekStartStr && dateStr <= todayInKST
+  return dateStr >= minDateStr && dateStr <= todayInKST
 }
 
 // Toggle a checklist record
 export async function toggleRecord(itemId: string, date: string, completed: boolean) {
-  if (!isDateInCurrentWeek(date)) return { error: '수정 가능한 기간이 지났거나 유효하지 않은 날짜입니다.' }
+  if (!isDateWithinSevenDays(date)) return { error: '수정 가능한 기간이 지났거나 유효하지 않은 날짜입니다.' }
   
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -41,7 +39,7 @@ export async function toggleRecord(itemId: string, date: string, completed: bool
 
 // Update checklist record memo
 export async function updateRecordMemo(itemId: string, date: string, memo: string) {
-  if (!isDateInCurrentWeek(date)) return { error: '수정 가능한 기간이 지났거나 유효하지 않은 날짜입니다.' }
+  if (!isDateWithinSevenDays(date)) return { error: '수정 가능한 기간이 지났거나 유효하지 않은 날짜입니다.' }
   
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

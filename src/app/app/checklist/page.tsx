@@ -5,7 +5,7 @@ import ChecklistItemComponent from './ChecklistItem'
 import CustomItemForm from './CustomItemForm'
 import WeekDayNav from './WeekDayNav'
 import { formatInTimeZone } from 'date-fns-tz'
-import { startOfWeek, format, addDays } from 'date-fns'
+import { format, subDays } from 'date-fns'
 
 export default async function ChecklistPage({
   searchParams,
@@ -22,20 +22,21 @@ export default async function ChecklistPage({
   // Use KST for today's date
   const todayInKST = formatInTimeZone(new Date(), 'Asia/Seoul', 'yyyy-MM-dd')
   
-  // Calculate this week's start (Sunday) in KST
+  // 7-day rolling window: 6 days ago ~ today
   const [y, m, d] = todayInKST.split('-').map(Number)
   const localToday = new Date(y, m - 1, d)
-  const weekStart = startOfWeek(localToday, { weekStartsOn: 0 })
-  const weekStartStr = format(weekStart, 'yyyy-MM-dd')
+  const minDate = format(subDays(localToday, 6), 'yyyy-MM-dd')
   
-  // Validate requested date — must be within [weekStart, today]
+  // Build the 7-day array (oldest → today)
+  const recentDays = Array.from({ length: 7 }).map((_, i) =>
+    format(subDays(localToday, 6 - i), 'yyyy-MM-dd')
+  )
+
+  // Validate requested date — must be within [today-6, today]
   const requestedDate = resolvedParams.date
-  const date = (requestedDate && requestedDate >= weekStartStr && requestedDate <= todayInKST)
+  const date = (requestedDate && requestedDate >= minDate && requestedDate <= todayInKST)
     ? requestedDate
     : todayInKST
-
-  // Build the 7-day week array
-  const weekDays = Array.from({ length: 7 }).map((_, i) => format(addDays(weekStart, i), 'yyyy-MM-dd'))
 
   // Get active membership
   const { data: membership } = await supabase
@@ -81,8 +82,8 @@ export default async function ChecklistPage({
         </p>
       </div>
 
-      {/* Week Day Navigator */}
-      <WeekDayNav weekDays={weekDays} selectedDate={date} todayStr={todayInKST} />
+      {/* 7-Day Rolling Navigator */}
+      <WeekDayNav recentDays={recentDays} selectedDate={date} todayStr={todayInKST} />
 
       <Card>
         <CardHeader>
