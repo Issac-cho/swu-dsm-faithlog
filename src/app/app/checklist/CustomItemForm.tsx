@@ -23,7 +23,7 @@ export default function CustomItemForm({ communityId }: { communityId: string })
     <form ref={formRef} action={handleSubmit} className="flex gap-2">
       <Input
         name="name"
-        placeholder="예: 성경 암송, 전도, 감사 기록"
+        placeholder="예: 성경 암송, 선행, 감사 기록"
         disabled={isPending}
         required
       />

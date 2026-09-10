@@ -57,7 +57,7 @@ BEGIN
     (new.user_id, new.community_id, '통독', 'SYSTEM', 1),
     (new.user_id, new.community_id, '기도', 'SYSTEM', 2),
     (new.user_id, new.community_id, '큐티', 'SYSTEM', 3),
-    (new.user_id, new.community_id, '전도', 'SYSTEM', 4)
+    (new.user_id, new.community_id, '적용', 'SYSTEM', 4)
   ON CONFLICT (user_id, community_id, name) WHERE type = 'SYSTEM' DO NOTHING;
     
   RETURN new;
