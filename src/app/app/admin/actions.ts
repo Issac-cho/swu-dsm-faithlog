@@ -146,3 +146,53 @@ export async function changeMemberRole(membershipId: string, newRole: string) {
   revalidatePath('/app/operator');
   return { success: true };
 }
+
+// Rename a cell
+export async function renameCell(cellId: string, newName: string) {
+  const trimmed = newName.trim()
+  if (!trimmed) return { error: '셀 이름을 입력해주세요.' }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized' }
+
+  const { data: cell } = await supabase.from('cells').select('community_id').eq('id', cellId).maybeSingle()
+  if (!cell) return { error: '셀을 찾을 수 없습니다.' }
+
+  const { data: operatorData } = await supabase.from('system_operators').select('user_id').eq('user_id', user.id).maybeSingle()
+  const isOperator = !!operatorData
+  const { data: membership } = await supabase.from('community_memberships').select('role').eq('user_id', user.id).eq('community_id', cell.community_id).maybeSingle()
+  if (!isOperator && !['admin', 'sub_admin'].includes(membership?.role)) return { error: '관리자 권한이 없습니다.' }
+
+  const { error } = await supabase.from('cells').update({ name: trimmed }).eq('id', cellId)
+  if (error) return { error: error.message }
+
+  revalidatePath('/app/admin')
+  revalidatePath('/', 'layout')
+  return { success: true }
+}
+
+// Delete a cell (nullifies member cell assignments first)
+export async function deleteCell(cellId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized' }
+
+  const { data: cell } = await supabase.from('cells').select('community_id').eq('id', cellId).maybeSingle()
+  if (!cell) return { error: '셀을 찾을 수 없습니다.' }
+
+  const { data: operatorData } = await supabase.from('system_operators').select('user_id').eq('user_id', user.id).maybeSingle()
+  const isOperator = !!operatorData
+  const { data: membership } = await supabase.from('community_memberships').select('role').eq('user_id', user.id).eq('community_id', cell.community_id).maybeSingle()
+  if (!isOperator && !['admin', 'sub_admin'].includes(membership?.role)) return { error: '관리자 권한이 없습니다.' }
+
+  // Nullify member cell assignments before deleting (preserve members)
+  await supabase.from('community_memberships').update({ cell_id: null }).eq('cell_id', cellId)
+
+  const { error } = await supabase.from('cells').delete().eq('id', cellId)
+  if (error) return { error: error.message }
+
+  revalidatePath('/app/admin')
+  revalidatePath('/', 'layout')
+  return { success: true }
+}

@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import Link from 'next/link'
 import { createCell } from './actions'
 import CellAssigner from './CellAssigner'
+import CellManager from './CellManager'
 import AdminShepherdManager from './AdminShepherdManager'
 import TalentPolicyManager from './TalentPolicyManager'
 import CommunitySettings from './CommunitySettings'
@@ -107,15 +108,7 @@ export default async function AdminPage() {
             </form>
             <div className="mt-6 space-y-2">
               <h3 className="font-semibold text-sm text-muted-foreground">현재 셀 목록</h3>
-              {cells?.length === 0 ? (
-                <p className="text-sm">생성된 셀이 없습니다.</p>
-              ) : (
-                <ul className="list-disc list-inside text-sm">
-                  {cells?.map((cell) => (
-                    <li key={cell.id}>{cell.name}</li>
-                  ))}
-                </ul>
-              )}
+              <CellManager cells={cells || []} />
             </div>
           </CardContent>
         </Card>
