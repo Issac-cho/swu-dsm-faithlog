@@ -196,3 +196,36 @@ export async function deleteCell(cellId: string) {
   revalidatePath('/', 'layout')
   return { success: true }
 }
+
+// Reset all talent transactions for a community (checklist records are preserved)
+export async function resetCommunityTalents(communityId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized' }
+
+  const { data: operatorData } = await supabase.from('system_operators').select('user_id').eq('user_id', user.id).maybeSingle()
+  const isOperator = !!operatorData
+  const { data: membership } = await supabase
+    .from('community_memberships')
+    .select('role')
+    .eq('user_id', user.id)
+    .eq('community_id', communityId)
+    .maybeSingle()
+
+  if (!isOperator && !['admin', 'sub_admin'].includes(membership?.role)) {
+    return { error: '관리자 권한이 없습니다.' }
+  }
+
+  const { error } = await supabase
+    .from('talent_transactions')
+    .delete()
+    .eq('community_id', communityId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/app/admin')
+  revalidatePath('/app/dashboard')
+  revalidatePath('/app/directory')
+  revalidatePath('/', 'layout')
+  return { success: true }
+}

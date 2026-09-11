@@ -23,6 +23,8 @@ export default async function DirectoryPage() {
     redirect('/app/community/join')
   }
 
+  const isAdmin = membership.role === 'admin' || membership.role === 'sub_admin'
+
   // Fetch shepherd relationships for the current user
   const { data: myRelationships } = await supabase
     .from('shepherd_relationships')
@@ -44,6 +46,20 @@ export default async function DirectoryPage() {
     .eq('community_id', membership.community_id)
     .order('created_at', { ascending: true })
 
+  // Fetch talent totals per user — only for admin/sub_admin
+  const talentMap = new Map<string, number>()
+  if (isAdmin) {
+    const { data: transactions } = await supabase
+      .from('talent_transactions')
+      .select('user_id, amount')
+      .eq('community_id', membership.community_id)
+      .is('deleted_at', null)
+
+    transactions?.forEach(tx => {
+      talentMap.set(tx.user_id, (talentMap.get(tx.user_id) || 0) + tx.amount)
+    })
+  }
+
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-6">
       <div>
@@ -62,6 +78,7 @@ export default async function DirectoryPage() {
           const name = profile?.name || '이름 없음'
           const avatar = profile?.avatar_icon || '👤'
           const cellName = (member.cell as any)?.name
+          const talent = talentMap.get(member.user_id) ?? 0
 
           const canViewHistory = 
             membership.role === 'admin' || 
@@ -91,6 +108,11 @@ export default async function DirectoryPage() {
                     )}
                     <span>{cellName || '셀 미배정'}</span>
                   </div>
+                  {isAdmin && (
+                    <div className="text-xs font-semibold text-yellow-600 mt-1">
+                      💰 {talent} T
+                    </div>
+                  )}
                 </div>
                 {canViewHistory && (
                   <Link 

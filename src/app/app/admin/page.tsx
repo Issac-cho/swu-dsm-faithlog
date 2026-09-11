@@ -10,6 +10,7 @@ import CellAssigner from './CellAssigner'
 import CellManager from './CellManager'
 import AdminShepherdManager from './AdminShepherdManager'
 import TalentPolicyManager from './TalentPolicyManager'
+import ResetTalentsButton from './ResetTalentsButton'
 import CommunitySettings from './CommunitySettings'
 import RemoveMemberButton from './RemoveMemberButton'
 import ChangeRoleButton from './ChangeRoleButton'
@@ -179,6 +180,17 @@ export default async function AdminPage() {
         <AdminShepherdManager members={flatMembers} relationships={relationships || []} />
 
         <TalentPolicyManager policies={policies || []} />
+
+        {/* 달란트 초기화 */}
+        <div className="md:col-span-2 border border-destructive/30 rounded-lg p-4 space-y-3">
+          <div>
+            <h3 className="font-semibold text-sm">달란트 전체 초기화</h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              공동체 전체 멤버의 달란트를 0으로 초기화합니다. 체크리스트 기록은 보존됩니다. 이 작업은 되돌릴 수 없습니다.
+            </p>
+          </div>
+          <ResetTalentsButton communityId={communityId} />
+        </div>
       </div>
     </div>
   )
