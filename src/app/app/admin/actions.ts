@@ -229,3 +229,79 @@ export async function resetCommunityTalents(communityId: string) {
   revalidatePath('/', 'layout')
   return { success: true }
 }
+
+// Create a bonus policy
+export async function createBonusPolicy(
+  communityId: string, 
+  checklistName: string, 
+  talentAmount: number, 
+  bonusStartDate: string, 
+  bonusEndDate: string, 
+  claimDeadline: string
+) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized' }
+
+  const { data: operatorData } = await supabase.from('system_operators').select('user_id').eq('user_id', user.id).maybeSingle()
+  const isOperator = !!operatorData
+  const { data: membership } = await supabase
+    .from('community_memberships')
+    .select('role')
+    .eq('user_id', user.id)
+    .eq('community_id', communityId)
+    .maybeSingle()
+
+  if (!isOperator && !['admin', 'sub_admin'].includes(membership?.role)) {
+    return { error: '관리자 권한이 없습니다.' }
+  }
+
+  const { error } = await supabase
+    .from('talent_policies')
+    .insert({
+      community_id: communityId,
+      checklist_name: checklistName,
+      talent_amount: talentAmount,
+      is_bonus: true,
+      bonus_start_date: bonusStartDate,
+      bonus_end_date: bonusEndDate,
+      claim_deadline: claimDeadline
+    })
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/app/admin')
+  return { success: true }
+}
+
+// Delete a bonus policy
+export async function deleteBonusPolicy(policyId: string, communityId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized' }
+
+  const { data: operatorData } = await supabase.from('system_operators').select('user_id').eq('user_id', user.id).maybeSingle()
+  const isOperator = !!operatorData
+  const { data: membership } = await supabase
+    .from('community_memberships')
+    .select('role')
+    .eq('user_id', user.id)
+    .eq('community_id', communityId)
+    .maybeSingle()
+
+  if (!isOperator && !['admin', 'sub_admin'].includes(membership?.role)) {
+    return { error: '관리자 권한이 없습니다.' }
+  }
+
+  const { error } = await supabase
+    .from('talent_policies')
+    .delete()
+    .eq('id', policyId)
+    .eq('community_id', communityId)
+    .eq('is_bonus', true)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/app/admin')
+  return { success: true }
+}

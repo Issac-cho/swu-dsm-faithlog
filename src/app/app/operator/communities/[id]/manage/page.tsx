@@ -176,7 +176,7 @@ export default async function OperatorCommunityManagePage({ params }: { params: 
 
         <AdminShepherdManager members={flatMembers} relationships={relationships} />
 
-        <TalentPolicyManager policies={policies || []} />
+        <TalentPolicyManager policies={policies || []} communityId={communityId} />
       </div>
     </div>
   )

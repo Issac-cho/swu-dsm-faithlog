@@ -179,7 +179,7 @@ export default async function AdminPage() {
 
         <AdminShepherdManager members={flatMembers} relationships={relationships || []} />
 
-        <TalentPolicyManager policies={policies || []} />
+        <TalentPolicyManager policies={policies || []} communityId={communityId} />
 
         {/* 달란트 초기화 */}
         <div className="md:col-span-2 border border-destructive/30 rounded-lg p-4 space-y-3">
