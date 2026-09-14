@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { searchCommunities, joinCommunityAction, createCommunityAction } from './actions'
+import { searchCommunities, joinCommunityAction } from './actions'
+import Link from 'next/link'
 
 export default function JoinCommunityClient() {
   const router = useRouter()
@@ -36,18 +37,6 @@ export default function JoinCommunityClient() {
       setError(res.error)
     } else {
       router.push('/app/dashboard')
-    }
-  }
-
-  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const fd = new FormData(e.currentTarget)
-    const name = fd.get('name') as string
-    const res = await createCommunityAction(name)
-    if (res.error) {
-      alert(res.error)
-    } else {
-      router.push('/app/admin')
     }
   }
 
@@ -98,24 +87,13 @@ export default function JoinCommunityClient() {
         </div>
       </div>
 
-      <div className="pt-8 border-t">
-        <h2 className="text-xl font-bold mb-4">새로운 공동체 만들기</h2>
-        <Card>
-          <CardHeader>
-            <CardTitle>공동체 개설</CardTitle>
-            <CardDescription>새로운 공동체를 만들고 관리자가 됩니다.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleCreate} className="flex gap-2">
-              <Input 
-                name="name" 
-                placeholder="공동체 이름 입력" 
-                required 
-              />
-              <Button type="submit">만들기</Button>
-            </form>
-          </CardContent>
-        </Card>
+      <div className="pt-6 border-t text-center">
+        <p className="text-sm text-muted-foreground">
+          새로운 공동체를 만드시겠어요?{' '}
+          <Link href="/app/community/create" className="text-primary underline underline-offset-4">
+            공동체 개설하기
+          </Link>
+        </p>
       </div>
     </div>
   )
