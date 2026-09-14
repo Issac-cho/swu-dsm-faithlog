@@ -18,6 +18,7 @@ export default async function WeeklyProgressCard({ userId, communityId }: { user
     .select('id, name, type, is_active, created_at, updated_at')
     .eq('user_id', userId)
     .eq('community_id', communityId)
+    .eq('type', 'SYSTEM')
     .is('deleted_at', null)
 
   const { data: weekRecords } = await supabase
