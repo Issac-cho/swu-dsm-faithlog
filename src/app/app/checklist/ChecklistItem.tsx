@@ -3,7 +3,8 @@
 import { useTransition, useOptimistic, useState, useEffect } from 'react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
-import { toggleRecord, updateRecordMemo } from './actions'
+import { Trash2 } from 'lucide-react'
+import { toggleRecord, updateRecordMemo, deleteCustomItem } from './actions'
 
 export default function ChecklistItemComponent({
   item,
@@ -15,6 +16,7 @@ export default function ChecklistItemComponent({
   date: string
 }) {
   const [isPending, startTransition] = useTransition()
+  const [isDeleting, setIsDeleting] = useState(false)
   const [optimisticCompleted, setOptimisticCompleted] = useOptimistic(
     record?.completed ?? false,
     (state, newValue: boolean) => newValue
@@ -43,14 +45,27 @@ export default function ChecklistItemComponent({
     })
   }
 
+  const handleDelete = () => {
+    if (!confirm(`'${item.name}' 항목을 삭제하시겠습니까? (과거 기록은 보존됩니다)`)) return
+    
+    setIsDeleting(true)
+    startTransition(async () => {
+      const res = await deleteCustomItem(item.id)
+      if (res.error) {
+        alert(res.error)
+        setIsDeleting(false)
+      }
+    })
+  }
+
   return (
-    <div className="flex items-center p-3 rounded-md hover:bg-muted/50 transition-colors">
+    <div className={`flex items-center p-3 rounded-md hover:bg-muted/50 transition-colors ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}>
       <div className="flex items-center space-x-3 flex-1 min-w-0">
         <Checkbox
           id={item.id}
           checked={optimisticCompleted}
           onCheckedChange={handleCheckedChange}
-          disabled={isPending}
+          disabled={isPending || isDeleting}
           className="w-6 h-6 shrink-0"
         />
         <label
@@ -70,15 +85,26 @@ export default function ChecklistItemComponent({
               onChange={(e) => setMemo(e.target.value)}
               onBlur={handleMemoBlur}
               className="h-8 text-xs bg-background/50 w-full"
+              disabled={isDeleting}
             />
           </div>
         )}
       </div>
 
       {item.type === 'CUSTOM' && (
-        <span className="text-[10px] bg-secondary text-secondary-foreground px-2 py-0.5 rounded-full shrink-0 ml-2">
-          커스텀
-        </span>
+        <div className="flex items-center gap-2 shrink-0 ml-2">
+          <span className="text-[10px] bg-secondary text-secondary-foreground px-2 py-0.5 rounded-full">
+            커스텀
+          </span>
+          <button 
+            onClick={handleDelete}
+            disabled={isPending || isDeleting}
+            className="text-muted-foreground hover:text-destructive p-1 rounded transition-colors disabled:opacity-50"
+            title="삭제"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
       )}
     </div>
   )

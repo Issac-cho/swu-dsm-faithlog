@@ -2,11 +2,18 @@ import { formatInTimeZone } from 'date-fns-tz'
 
 export function getActiveItemsForDay(allItems: any[], dayStr: string) {
   return allItems?.filter(item => {
+    if (item.type === 'SYSTEM') return true
+    
     const createdStr = formatInTimeZone(new Date(item.created_at), 'Asia/Seoul', 'yyyy-MM-dd')
     if (createdStr > dayStr) return false
     
-    const updatedStr = formatInTimeZone(new Date(item.updated_at), 'Asia/Seoul', 'yyyy-MM-dd')
-    if (!item.is_active && updatedStr < dayStr) return false
+    if (item.deleted_at) {
+      const deletedStr = formatInTimeZone(new Date(item.deleted_at), 'Asia/Seoul', 'yyyy-MM-dd')
+      if (deletedStr < dayStr) return false
+    } else if (!item.is_active) {
+      const updatedStr = formatInTimeZone(new Date(item.updated_at), 'Asia/Seoul', 'yyyy-MM-dd')
+      if (updatedStr < dayStr) return false
+    }
     return true
   }) || []
 }

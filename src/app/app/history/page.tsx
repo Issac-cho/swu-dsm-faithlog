@@ -94,10 +94,9 @@ export default async function HistoryPage({
   // Common data
   const { data: allItems } = await supabase
     .from('checklist_items')
-    .select('id, name, type, is_active, created_at, updated_at, sort_order')
+    .select('id, name, type, is_active, created_at, updated_at, deleted_at, sort_order')
     .eq('user_id', queryUserId)
     .eq('community_id', membership.community_id)
-    .is('deleted_at', null)
     .order('sort_order', { ascending: true })
 
   const headers = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
@@ -116,7 +115,7 @@ export default async function HistoryPage({
   const prevWeekStr = format(subDays(weekStart, 7), 'yyyy-MM-dd')
   const nextWeekStr = format(addDays(weekStart, 7), 'yyyy-MM-dd')
 
-  const activeWeeklyItems = allItems?.filter(item => item.is_active) || []
+  const activeWeeklyItems = allItems?.filter(item => item.is_active && !item.deleted_at) || []
 
   const { data: weekRecords } = await supabase
     .from('checklist_records')
@@ -159,9 +158,15 @@ export default async function HistoryPage({
     const activeItemsForDay = allItems?.filter(item => {
       if (item.type === 'SYSTEM') return true
       const createdStr = formatInTimeZone(new Date(item.created_at), 'Asia/Seoul', 'yyyy-MM-dd')
-      const updatedStr = formatInTimeZone(new Date(item.updated_at), 'Asia/Seoul', 'yyyy-MM-dd')
       if (createdStr > dayStr) return false
-      if (!item.is_active && updatedStr < dayStr) return false
+      
+      if (item.deleted_at) {
+        const deletedStr = formatInTimeZone(new Date(item.deleted_at), 'Asia/Seoul', 'yyyy-MM-dd')
+        if (deletedStr < dayStr) return false
+      } else if (!item.is_active) {
+        const updatedStr = formatInTimeZone(new Date(item.updated_at), 'Asia/Seoul', 'yyyy-MM-dd')
+        if (updatedStr < dayStr) return false
+      }
       return true
     }) || []
 
@@ -206,9 +211,15 @@ export default async function HistoryPage({
       const activeItemsForDay = allItems?.filter(item => {
         if (item.type === 'SYSTEM') return true
         const createdStr = formatInTimeZone(new Date(item.created_at), 'Asia/Seoul', 'yyyy-MM-dd')
-        const updatedStr = formatInTimeZone(new Date(item.updated_at), 'Asia/Seoul', 'yyyy-MM-dd')
         if (createdStr > dayStr) return false
-        if (!item.is_active && updatedStr < dayStr) return false
+        
+        if (item.deleted_at) {
+          const deletedStr = formatInTimeZone(new Date(item.deleted_at), 'Asia/Seoul', 'yyyy-MM-dd')
+          if (deletedStr < dayStr) return false
+        } else if (!item.is_active) {
+          const updatedStr = formatInTimeZone(new Date(item.updated_at), 'Asia/Seoul', 'yyyy-MM-dd')
+          if (updatedStr < dayStr) return false
+        }
         return true
       }) || []
 

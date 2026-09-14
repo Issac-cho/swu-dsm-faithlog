@@ -88,6 +88,21 @@ export async function addCustomItem(communityId: string, name: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Unauthorized' }
 
+  // Check if an active item with the same name exists
+  const { data: existingActive } = await supabase
+    .from('checklist_items')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('community_id', communityId)
+    .eq('name', name)
+    .eq('type', 'CUSTOM')
+    .is('deleted_at', null)
+    .maybeSingle()
+
+  if (existingActive) {
+    return { error: '이미 동일한 이름의 커스텀 항목이 존재합니다.' }
+  }
+
   // Get max sort_order
   const { data: items } = await supabase
     .from('checklist_items')
@@ -113,14 +128,18 @@ export async function addCustomItem(communityId: string, name: string) {
   return { success: true }
 }
 
-// Disable a custom item (instead of deleting to keep history)
-export async function disableCustomItem(itemId: string) {
+// Soft-delete a custom item
+export async function deleteCustomItem(itemId: string) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized' }
+
   const { error } = await supabase
     .from('checklist_items')
-    .update({ is_active: false })
+    .update({ deleted_at: new Date().toISOString() })
     .eq('id', itemId)
-    .eq('type', 'CUSTOM') // ensure only custom can be deleted
+    .eq('user_id', user.id)
+    .eq('type', 'CUSTOM')
 
   if (error) return { error: error.message }
   
