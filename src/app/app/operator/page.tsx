@@ -59,13 +59,15 @@ export default async function OperatorHomePage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-destructive/5 border-destructive/20">
-          <CardContent className="flex flex-col items-center justify-center p-6">
-            <Users className="w-8 h-8 text-destructive mb-2" />
-            <div className="text-3xl font-bold">{totalUsers}명</div>
-            <div className="text-sm text-muted-foreground">전체 누적 가입자</div>
-          </CardContent>
-        </Card>
+        <Link href="/app/operator/users" className="block transition-transform hover:scale-[1.02]">
+          <Card className="bg-destructive/5 border-destructive/20 h-full hover:border-destructive/40 transition-colors cursor-pointer">
+            <CardContent className="flex flex-col items-center justify-center p-6">
+              <Users className="w-8 h-8 text-destructive mb-2" />
+              <div className="text-3xl font-bold text-destructive">{totalUsers}명</div>
+              <div className="text-sm text-destructive/80 font-medium mt-1">전체 가입자 목록 보기 &rarr;</div>
+            </CardContent>
+          </Card>
+        </Link>
         <Card className="bg-primary/5 border-primary/20">
           <CardContent className="flex flex-col items-center justify-center p-6">
             <LayoutGrid className="w-8 h-8 text-primary mb-2" />
