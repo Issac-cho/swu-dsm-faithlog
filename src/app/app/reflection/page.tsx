@@ -37,7 +37,7 @@ export default async function ReflectionPage() {
     .is('deleted_at', null)
     .single()
 
-  // Fetch ALL reflections for the community this week
+  // Fetch ALL reflections for the community (like a feed)
   const { data: allReflections, error: allReflectionsError } = await supabase
     .from('weekly_reflections')
     .select(`
@@ -48,8 +48,8 @@ export default async function ReflectionPage() {
       )
     `)
     .eq('community_id', membership.community_id)
-    .eq('week_start_date', weekStartStr)
     .order('updated_at', { ascending: false })
+    .limit(100)
 
   if (allReflectionsError) {
     console.error('Error fetching all reflections:', allReflectionsError)
@@ -100,7 +100,7 @@ export default async function ReflectionPage() {
       <div className="mt-12 space-y-6">
         <div>
           <h2 className="text-xl font-bold">공동체 나눔</h2>
-          <p className="text-sm text-muted-foreground">우리 공동체 구성원들의 이번 주 다짐과 평가입니다.</p>
+          <p className="text-sm text-muted-foreground">우리 공동체 구성원들의 다짐과 평가입니다.</p>
         </div>
         
         <div className="space-y-6 bg-muted/30 p-4 rounded-xl">
