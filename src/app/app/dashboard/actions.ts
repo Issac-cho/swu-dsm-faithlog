@@ -39,9 +39,10 @@ export async function claimPerfectWeekBonus(weekStartStr: string) {
   
   const { data: allItems } = await supabase
     .from('checklist_items')
-    .select('id, name, type, is_active, created_at, updated_at')
+    .select('id, name, type, is_active, created_at, updated_at, deleted_at')
     .eq('user_id', user.id)
     .eq('community_id', membership.community_id)
+    .eq('type', 'SYSTEM')
 
   const { data: weekRecords } = await supabase
     .from('checklist_records')

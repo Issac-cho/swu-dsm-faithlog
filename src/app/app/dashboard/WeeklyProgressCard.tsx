@@ -15,7 +15,7 @@ export default async function WeeklyProgressCard({ userId, communityId }: { user
 
   const { data: allItems } = await supabase
     .from('checklist_items')
-    .select('id, name, type, is_active, created_at, updated_at')
+    .select('id, name, type, is_active, created_at, updated_at, deleted_at')
     .eq('user_id', userId)
     .eq('community_id', communityId)
     .eq('type', 'SYSTEM')
