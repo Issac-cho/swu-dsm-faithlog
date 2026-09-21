@@ -237,7 +237,8 @@ export async function createBonusPolicy(
   talentAmount: number, 
   bonusStartDate: string, 
   bonusEndDate: string, 
-  claimDeadline: string
+  claimDeadline: string,
+  bonusTitle: string
 ) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -265,7 +266,8 @@ export async function createBonusPolicy(
       is_bonus: true,
       bonus_start_date: bonusStartDate,
       bonus_end_date: bonusEndDate,
-      claim_deadline: claimDeadline
+      claim_deadline: claimDeadline,
+      bonus_title: bonusTitle
     })
 
   if (error) return { error: error.message }

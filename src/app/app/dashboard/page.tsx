@@ -26,6 +26,18 @@ export default async function DashboardPage() {
   const today = new Date()
   const todayInKST = formatInTimeZone(today, 'Asia/Seoul', 'yyyy-MM-dd')
   
+  // Check for active bonus policy
+  const { data: activeBonus } = await supabase
+    .from('talent_policies')
+    .select('bonus_title, bonus_start_date, bonus_end_date')
+    .eq('community_id', membership.community_id)
+    .eq('is_bonus', true)
+    .lte('bonus_start_date', todayInKST)
+    .gte('bonus_end_date', todayInKST)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  
   // 1. Fetch today's checklist stats
   const { data: items } = await supabase
     .from('checklist_items')
@@ -81,11 +93,30 @@ export default async function DashboardPage() {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
-        {/* 오늘 체크리스트 요약 */}
-        <Card className="flex flex-col">
+        {/* 오늘의 체크리스트 요약 */}
+        <Card className={`flex flex-col relative overflow-hidden transition-all duration-300 ${activeBonus ? 'border-yellow-400 bg-gradient-to-br from-yellow-50 to-orange-50 shadow-md ring-1 ring-yellow-400/50' : ''}`}>
+          {activeBonus && (
+            <div className="absolute top-0 right-0 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg shadow-sm animate-pulse">
+              보너스 기간!
+            </div>
+          )}
           <CardHeader>
-            <CardTitle>오늘의 체크리스트</CardTitle>
-            <CardDescription>{todayInKST}</CardDescription>
+            <div className="flex justify-between items-start gap-2">
+              <div>
+                <CardTitle>오늘의 체크리스트</CardTitle>
+                <CardDescription>{todayInKST}</CardDescription>
+              </div>
+              {activeBonus && (
+                <div className="text-right flex-shrink-0 mt-3 sm:mt-0 pr-1">
+                  <div className="text-sm font-bold text-yellow-700 flex items-center justify-end">
+                    ✨ {activeBonus.bonus_title} ✨
+                  </div>
+                  <div className="text-[10px] text-yellow-700/70 font-medium">
+                    {activeBonus.bonus_start_date} ~ {activeBonus.bonus_end_date}
+                  </div>
+                </div>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="flex-1 flex flex-col justify-between space-y-6">
             <div className="space-y-2">

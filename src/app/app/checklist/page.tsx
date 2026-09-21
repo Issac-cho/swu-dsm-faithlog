@@ -49,6 +49,18 @@ export default async function ChecklistPage({
     redirect('/app/community/join')
   }
 
+  // Check for active bonus policy on the selected date
+  const { data: activeBonus } = await supabase
+    .from('talent_policies')
+    .select('bonus_title, bonus_start_date, bonus_end_date')
+    .eq('community_id', membership.community_id)
+    .eq('is_bonus', true)
+    .lte('bonus_start_date', date)
+    .gte('bonus_end_date', date)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
   // Get items
   const { data: items } = await supabase
     .from('checklist_items')
@@ -85,10 +97,29 @@ export default async function ChecklistPage({
       {/* 7-Day Rolling Navigator */}
       <WeekDayNav recentDays={recentDays} selectedDate={date} todayStr={todayInKST} />
 
-      <Card>
+      <Card className={`relative overflow-hidden transition-all duration-300 ${activeBonus ? 'border-yellow-400 bg-gradient-to-br from-yellow-50 to-orange-50 shadow-md ring-1 ring-yellow-400/50' : ''}`}>
+        {activeBonus && (
+          <div className="absolute top-0 right-0 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg shadow-sm animate-pulse">
+            보너스 기간!
+          </div>
+        )}
         <CardHeader>
-          <CardTitle>{isToday ? '오늘의 기록' : `${date} 기록`}</CardTitle>
-          <CardDescription>매일의 신앙생활을 기록하고 달란트를 받으세요.</CardDescription>
+          <div className="flex justify-between items-start gap-2">
+            <div>
+              <CardTitle>{isToday ? '오늘의 기록' : `${date} 기록`}</CardTitle>
+              <CardDescription>매일의 신앙생활을 기록하고 달란트를 받으세요.</CardDescription>
+            </div>
+            {activeBonus && (
+              <div className="text-right flex-shrink-0 mt-3 sm:mt-0 pr-1">
+                <div className="text-sm font-bold text-yellow-700 flex items-center justify-end">
+                  ✨ {activeBonus.bonus_title} ✨
+                </div>
+                <div className="text-[10px] text-yellow-700/70 font-medium">
+                  {activeBonus.bonus_start_date} ~ {activeBonus.bonus_end_date}
+                </div>
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="space-y-2">
           {items?.map((item) => (

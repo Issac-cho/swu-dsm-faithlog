@@ -19,6 +19,7 @@ interface Policy {
   bonus_start_date: string | null
   bonus_end_date: string | null
   claim_deadline: string | null
+  bonus_title: string | null
 }
 
 const SYSTEM_ITEMS = ['통독', '기도', '큐티', '적용']
@@ -29,6 +30,7 @@ export default function TalentPolicyManager({ policies, communityId }: { policie
   const [isPending, setIsPending] = useState(false)
 
   // Bonus Form State
+  const [bonusTitle, setBonusTitle] = useState<string>('')
   const [bonusItem, setBonusItem] = useState(SYSTEM_ITEMS[0])
   const [bonusAmount, setBonusAmount] = useState<number>(20)
   const [bonusStartDate, setBonusStartDate] = useState<string>('')
@@ -58,8 +60,8 @@ export default function TalentPolicyManager({ policies, communityId }: { policie
 
   const handleCreateBonus = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!bonusStartDate || !bonusEndDate) {
-      alert('보너스 기간을 입력해주세요.')
+    if (!bonusTitle || !bonusStartDate || !bonusEndDate) {
+      alert('보너스 제목과 기간을 입력해주세요.')
       return
     }
 
@@ -85,11 +87,13 @@ export default function TalentPolicyManager({ policies, communityId }: { policie
       bonusAmount,
       bonusStartDate,
       bonusEndDate,
-      finalDeadline
+      finalDeadline,
+      bonusTitle
     )
     setIsPending(false)
 
     if (result.success) {
+      setBonusTitle('')
       setBonusStartDate('')
       setBonusEndDate('')
       setCustomDeadline('')
@@ -192,6 +196,18 @@ export default function TalentPolicyManager({ policies, communityId }: { policie
         </CardHeader>
         <CardContent className="space-y-6">
           <form onSubmit={handleCreateBonus} className="grid gap-4 bg-muted/30 p-4 rounded-lg border">
+            <div className="space-y-2">
+              <Label>보너스 제목</Label>
+              <Input 
+                type="text" 
+                value={bonusTitle} 
+                onChange={(e) => setBonusTitle(e.target.value)}
+                placeholder="예: 추석 특별 보너스 기간!"
+                disabled={isPending}
+                required
+              />
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>대상 항목 (기본 항목만 가능)</Label>
@@ -275,7 +291,7 @@ export default function TalentPolicyManager({ policies, communityId }: { policie
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>항목</TableHead>
+                  <TableHead>제목 / 항목</TableHead>
                   <TableHead>지급량</TableHead>
                   <TableHead>보너스 기간 (record_date)</TableHead>
                   <TableHead>수령 기한</TableHead>
@@ -285,7 +301,10 @@ export default function TalentPolicyManager({ policies, communityId }: { policie
               <TableBody>
                 {bonusPolicies.map(policy => (
                   <TableRow key={policy.id}>
-                    <TableCell className="font-medium">{policy.checklist_name}</TableCell>
+                    <TableCell>
+                      <div className="font-bold text-xs mb-1 text-primary">{policy.bonus_title}</div>
+                      <div className="font-medium text-sm">{policy.checklist_name}</div>
+                    </TableCell>
                     <TableCell>{policy.talent_amount} T</TableCell>
                     <TableCell>
                       {policy.bonus_start_date} ~ {policy.bonus_end_date}
