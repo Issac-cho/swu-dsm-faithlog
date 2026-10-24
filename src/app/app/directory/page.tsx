@@ -4,6 +4,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { BookOpen } from 'lucide-react'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export default async function DirectoryPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -58,6 +60,9 @@ export default async function DirectoryPage() {
         talentMap.set(row.user_id, Number(row.total_talent))
       })
     } else {
+      if (rpcError) {
+        console.error('[DirectoryPage] get_community_member_talent_totals failed, falling back:', rpcError)
+      }
       // Fallback in case RPC is not yet created in DB
       const { data: transactions } = await supabase
         .from('talent_transactions')
