@@ -49,15 +49,26 @@ export default async function DirectoryPage() {
   // Fetch talent totals per user — only for admin/sub_admin
   const talentMap = new Map<string, number>()
   if (isAdmin) {
-    const { data: transactions } = await supabase
-      .from('talent_transactions')
-      .select('user_id, amount')
-      .eq('community_id', membership.community_id)
-      .is('deleted_at', null)
-
-    transactions?.forEach(tx => {
-      talentMap.set(tx.user_id, (talentMap.get(tx.user_id) || 0) + tx.amount)
+    const { data: totals, error: rpcError } = await supabase.rpc('get_community_member_talent_totals', {
+      p_community_id: membership.community_id
     })
+
+    if (!rpcError && totals) {
+      totals.forEach((row: { user_id: string; total_talent: number }) => {
+        talentMap.set(row.user_id, Number(row.total_talent))
+      })
+    } else {
+      // Fallback in case RPC is not yet created in DB
+      const { data: transactions } = await supabase
+        .from('talent_transactions')
+        .select('user_id, amount')
+        .eq('community_id', membership.community_id)
+        .is('deleted_at', null)
+
+      transactions?.forEach(tx => {
+        talentMap.set(tx.user_id, (talentMap.get(tx.user_id) || 0) + tx.amount)
+      })
+    }
   }
 
   return (

@@ -34,6 +34,8 @@ export async function toggleRecord(itemId: string, date: string, completed: bool
 
   revalidatePath('/app/checklist')
   revalidatePath('/app/dashboard')
+  revalidatePath('/app/directory')
+  revalidatePath('/app/cell')
   return { success: true }
 }
 

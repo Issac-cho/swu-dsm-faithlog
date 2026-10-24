@@ -86,5 +86,7 @@ export async function claimPerfectWeekBonus(weekStartStr: string) {
 
   revalidatePath('/app/dashboard')
   revalidatePath('/app/history')
+  revalidatePath('/app/directory')
+  revalidatePath('/app/cell')
   return { success: true }
 }
