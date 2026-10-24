@@ -2,16 +2,20 @@
 CREATE OR REPLACE FUNCTION public.get_community_member_talent_totals(p_community_id uuid)
 RETURNS TABLE (user_id uuid, total_talent bigint) AS $$
 BEGIN
-  -- Verify the caller is an admin, sub_admin, or system operator (use explicit table aliases to avoid ambiguity)
-  IF NOT EXISTS (
-    SELECT 1 FROM public.community_memberships cm
-    WHERE cm.user_id = auth.uid() 
-      AND cm.community_id = p_community_id 
-      AND cm.role IN ('admin', 'sub_admin')
-  ) AND NOT EXISTS (
-    SELECT 1 FROM public.system_operators so WHERE so.user_id = auth.uid()
-  ) THEN
-    RAISE EXCEPTION 'Access Denied';
+  -- Verify caller: allow 'postgres' superuser in SQL Editor, and strictly verify admin/sub_admin/operator for app callers
+  IF current_user != 'postgres' THEN
+    IF auth.uid() IS NULL OR (
+      NOT EXISTS (
+        SELECT 1 FROM public.community_memberships cm
+        WHERE cm.user_id = auth.uid() 
+          AND cm.community_id = p_community_id 
+          AND cm.role IN ('admin', 'sub_admin')
+      ) AND NOT EXISTS (
+        SELECT 1 FROM public.system_operators so WHERE so.user_id = auth.uid()
+      )
+    ) THEN
+      RAISE EXCEPTION 'Access Denied';
+    END IF;
   END IF;
 
   RETURN QUERY
