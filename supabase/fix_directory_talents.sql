@@ -2,14 +2,14 @@
 CREATE OR REPLACE FUNCTION public.get_community_member_talent_totals(p_community_id uuid)
 RETURNS TABLE (user_id uuid, total_talent bigint) AS $$
 BEGIN
-  -- Verify the caller is an admin, sub_admin, or system operator
+  -- Verify the caller is an admin, sub_admin, or system operator (use explicit table aliases to avoid ambiguity)
   IF NOT EXISTS (
-    SELECT 1 FROM public.community_memberships 
-    WHERE user_id = auth.uid() 
-      AND community_id = p_community_id 
-      AND role IN ('admin', 'sub_admin')
+    SELECT 1 FROM public.community_memberships cm
+    WHERE cm.user_id = auth.uid() 
+      AND cm.community_id = p_community_id 
+      AND cm.role IN ('admin', 'sub_admin')
   ) AND NOT EXISTS (
-    SELECT 1 FROM public.system_operators WHERE user_id = auth.uid()
+    SELECT 1 FROM public.system_operators so WHERE so.user_id = auth.uid()
   ) THEN
     RAISE EXCEPTION 'Access Denied';
   END IF;
