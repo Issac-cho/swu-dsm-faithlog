@@ -1,5 +1,7 @@
 'use client'
 
+import { trackAction } from '@/lib/analytics/client'
+
 import { useState } from 'react'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -18,7 +20,7 @@ export default function CommunitySettings({ communityId, initialPassword }: { co
         <form 
           className="flex gap-2 max-w-sm" 
           action={async (fd) => {
-            const res = await updateCommunityPassword(fd)
+            const res = await trackAction('updateCommunityPassword', () => updateCommunityPassword(fd))
             if (res.success) {
               window.alert('가입 비밀번호가 변경되었습니다.')
             } else {

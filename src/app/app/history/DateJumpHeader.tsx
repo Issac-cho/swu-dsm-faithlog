@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 
@@ -56,8 +56,8 @@ export default function DateJumpHeader({
 
   return (
     <div className="flex items-center justify-between mb-2 px-2 w-full">
-      <Link href={prevUrl}>
-        <Button variant="ghost" size="icon"><ChevronLeft className="h-5 w-5" /></Button>
+      <Link className={buttonVariants({ variant: 'ghost', size: 'icon' })} href={prevUrl} aria-label={type === 'weekly' ? '이전 주' : type === 'monthly' ? '이전 달' : '이전 해'}>
+        <ChevronLeft aria-hidden="true" className="h-5 w-5" />
       </Link>
       
       <Popover open={open} onOpenChange={setOpen}>
@@ -104,8 +104,8 @@ export default function DateJumpHeader({
         </PopoverContent>
       </Popover>
 
-      <Link href={nextUrl}>
-        <Button variant="ghost" size="icon"><ChevronRight className="h-5 w-5" /></Button>
+      <Link className={buttonVariants({ variant: 'ghost', size: 'icon' })} href={nextUrl} aria-label={type === 'weekly' ? '다음 주' : type === 'monthly' ? '다음 달' : '다음 해'}>
+        <ChevronRight aria-hidden="true" className="h-5 w-5" />
       </Link>
     </div>
   )

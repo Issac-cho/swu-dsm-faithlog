@@ -1,5 +1,6 @@
 'use client'
 
+import { trackEvent } from '@/lib/analytics/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -8,6 +9,8 @@ export default function HistoryTabs({ currentTab }: { currentTab: string }) {
   const searchParams = useSearchParams()
 
   const handleTabChange = (value: string) => {
+    if (value === currentTab) return
+    trackEvent('history_tab', value)
     const params = new URLSearchParams(searchParams.toString())
     params.set('tab', value)
     router.push(`?${params.toString()}`)

@@ -1,5 +1,7 @@
 'use client'
 
+import { trackAction } from '@/lib/analytics/client'
+
 import { Button } from '@/components/ui/button'
 import { removeMember } from './actions'
 import { useState } from 'react'
@@ -12,7 +14,7 @@ export default function RemoveMemberButton({ membershipId, memberName }: { membe
     
     setIsPending(true)
     try {
-      await removeMember(membershipId)
+      await trackAction('removeMember', () => removeMember(membershipId))
       alert('성공적으로 내보냈습니다.')
     } catch (e: any) {
       alert('오류가 발생했습니다: ' + e.message)

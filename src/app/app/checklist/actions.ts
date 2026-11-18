@@ -33,6 +33,7 @@ export async function toggleRecord(itemId: string, date: string, completed: bool
   if (error) return { error: error.message }
 
   revalidatePath('/app/checklist')
+  revalidatePath('/app/history')
   revalidatePath('/app/dashboard')
   revalidatePath('/app/directory')
   revalidatePath('/app/cell')
@@ -127,6 +128,7 @@ export async function addCustomItem(communityId: string, name: string) {
   if (error) return { error: error.message }
   
   revalidatePath('/app/checklist')
+  revalidatePath('/app/history')
   return { success: true }
 }
 
@@ -146,5 +148,6 @@ export async function deleteCustomItem(itemId: string) {
   if (error) return { error: error.message }
   
   revalidatePath('/app/checklist')
+  revalidatePath('/app/history')
   return { success: true }
 }

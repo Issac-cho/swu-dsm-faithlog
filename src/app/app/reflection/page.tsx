@@ -74,7 +74,6 @@ export default async function ReflectionPage() {
               weekStartDate={weekStartStr}
               type="commitment"
               initialContent={reflection?.commitment || ''}
-              placeholder="예) 이번 주는 매일 아침 10분씩 큐티를 하고, 셀 모임에 꼭 참석하겠습니다."
             />
           </CardContent>
         </Card>
@@ -90,7 +89,6 @@ export default async function ReflectionPage() {
               weekStartDate={weekStartStr}
               type="review"
               initialContent={reflection?.review || ''}
-              placeholder="예) 바쁜 일정 속에서도 수요일에 기도 시간을 가진 것이 참 감사했습니다."
             />
           </CardContent>
         </Card>
@@ -130,18 +128,18 @@ export default async function ReflectionPage() {
                   }`}>
                     {ref.commitment && (
                       <div className="mb-2 last:mb-0">
-                        <span className="font-semibold text-xs opacity-70">다짐 :</span>
+                        <span className="font-semibold text-xs">다짐 :</span>
                         <div className="mt-0.5">{ref.commitment}</div>
                       </div>
                     )}
                     {ref.review && (
                       <div>
-                        <span className="font-semibold text-xs opacity-70">평가 :</span>
+                        <span className="font-semibold text-xs">평가 :</span>
                         <div className="mt-0.5">{ref.review}</div>
                       </div>
                     )}
                   </div>
-                  <span className="text-[10px] text-muted-foreground mt-1 px-1">
+                  <span className="text-xs text-muted-foreground mt-1 px-1">
                     {formatInTimeZone(new Date(ref.updated_at), 'Asia/Seoul', 'MM.dd HH:mm')}
                   </span>
                 </div>

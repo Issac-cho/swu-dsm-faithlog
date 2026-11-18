@@ -1,5 +1,7 @@
 'use client'
 
+import { trackAction } from '@/lib/analytics/client'
+
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -39,7 +41,7 @@ export default function ProfileForm({
     formData.append('name', name)
     formData.append('avatarIcon', avatarIcon)
     
-    const res = await updateProfile(formData)
+    const res = await trackAction('updateProfile', () => updateProfile(formData))
     if (res.error) {
       alert(res.error)
     } else {
@@ -55,6 +57,7 @@ export default function ProfileForm({
         <Dialog open={isEmojiModalOpen} onOpenChange={setIsEmojiModalOpen}>
           <DialogTrigger 
             render={<button type="button" />}
+            aria-label="프로필 이모지 변경"
             className="w-24 h-24 text-5xl bg-muted rounded-full flex items-center justify-center hover:ring-4 hover:ring-primary/20 transition-all cursor-pointer shadow-sm relative group"
           >
             {avatarIcon}
@@ -96,8 +99,9 @@ export default function ProfileForm({
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-semibold">이름</label>
+        <label htmlFor="profile-name" className="text-sm font-semibold">이름</label>
         <Input 
+          id="profile-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="이름을 입력해주세요"

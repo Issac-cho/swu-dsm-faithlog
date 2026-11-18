@@ -40,6 +40,7 @@ export default async function CellPage() {
       const { data: talents } = await supabase
         .from('talent_transactions')
         .select('user_id, amount')
+        .is('deleted_at', null)
         .eq('community_id', membership.community_id)
         .in('user_id', userIds)
 

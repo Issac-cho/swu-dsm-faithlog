@@ -4,6 +4,7 @@ import { logout } from '@/app/auth/actions'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
+import AnalyticsTracker from '@/components/AnalyticsTracker'
 import BackButton from '@/components/BackButton'
 
 export default async function AppLayout({
@@ -73,6 +74,7 @@ export default async function AppLayout({
           </form>
         </div>
       </header>
+      <AnalyticsTracker userId={user.id} />
       <main className="flex-1 w-full max-w-5xl mx-auto">
         {children}
       </main>

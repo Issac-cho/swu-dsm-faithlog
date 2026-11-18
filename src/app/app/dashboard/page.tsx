@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { formatInTimeZone } from 'date-fns-tz'
 import { startOfWeek, format, addDays } from 'date-fns'
 import WeeklyProgressCard from './WeeklyProgressCard'
+import { calculateDayProgress } from '@/utils/progress'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -41,25 +42,23 @@ export default async function DashboardPage() {
   // 1. Fetch today's checklist stats
   const { data: items } = await supabase
     .from('checklist_items')
-    .select('id')
+    .select('id, type, is_active, created_at, updated_at, deleted_at')
     .eq('user_id', user.id)
     .eq('community_id', membership.community_id)
-    .eq('is_active', true)
-    .is('deleted_at', null)
 
   const itemIds = items?.map(i => i.id) || []
 
   const { data: todayRecords } = await supabase
     .from('checklist_records')
-    .select('id')
+    .select('checklist_item_id, record_date, completed')
+    .is('deleted_at', null)
     .eq('user_id', user.id)
     .in('checklist_item_id', itemIds.length > 0 ? itemIds : ['00000000-0000-0000-0000-000000000000'])
     .eq('record_date', todayInKST)
     .eq('completed', true)
 
-  const totalItems = items?.length || 0
-  const completedItems = todayRecords?.length || 0
-  const todayProgress = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0
+  const { total: totalItems, completed: completedItems, percentage } = calculateDayProgress(items || [], todayRecords || [], todayInKST)
+  const todayProgress = Math.round(percentage)
 
   // 2. Fetch Cell Rankings using the RPC function
   let cellRankings = []
@@ -96,7 +95,7 @@ export default async function DashboardPage() {
         {/* 오늘의 체크리스트 요약 */}
         <Card className={`flex flex-col relative overflow-hidden transition-all duration-300 ${activeBonus ? 'border-yellow-400 bg-gradient-to-br from-yellow-50 to-orange-50 shadow-md ring-1 ring-yellow-400/50' : ''}`}>
           {activeBonus && (
-            <div className="absolute top-0 right-0 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg shadow-sm animate-pulse">
+            <div className="absolute top-0 right-0 bg-gradient-to-r from-yellow-400 to-yellow-600 text-yellow-950 text-xs font-bold px-3 py-1 rounded-bl-lg shadow-sm animate-pulse">
               보너스 기간!
             </div>
           )}
@@ -111,7 +110,7 @@ export default async function DashboardPage() {
                   <div className="text-sm font-bold text-yellow-700 flex items-center justify-end">
                     ✨ {activeBonus.bonus_title} ✨
                   </div>
-                  <div className="text-[10px] text-yellow-700/70 font-medium">
+                  <div className="text-xs text-yellow-700/70 font-medium">
                     {activeBonus.bonus_start_date} ~ {activeBonus.bonus_end_date}
                   </div>
                 </div>

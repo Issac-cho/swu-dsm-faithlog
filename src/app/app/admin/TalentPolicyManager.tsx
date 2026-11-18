@@ -1,5 +1,7 @@
 'use client'
 
+import { trackAction } from '@/lib/analytics/client'
+
 import { useState, useEffect } from 'react'
 import { updateTalentPolicy, createBonusPolicy, deleteBonusPolicy } from './actions'
 import { Input } from '@/components/ui/input'
@@ -49,7 +51,7 @@ export default function TalentPolicyManager({ policies, communityId }: { policie
 
   const handleSaveBase = async (policyId: string) => {
     setIsPending(true)
-    const result = await updateTalentPolicy(policyId, editAmount)
+    const result = await trackAction('updateTalentPolicy', () => updateTalentPolicy(policyId, editAmount))
     setIsPending(false)
     if (result.success) {
       setEditingId(null)
@@ -81,7 +83,7 @@ export default function TalentPolicyManager({ policies, communityId }: { policie
     }
 
     setIsPending(true)
-    const result = await createBonusPolicy(
+    const result = await trackAction('createBonusPolicy', () => createBonusPolicy(
       communityId,
       bonusItem,
       bonusAmount,
@@ -89,7 +91,7 @@ export default function TalentPolicyManager({ policies, communityId }: { policie
       bonusEndDate,
       finalDeadline,
       bonusTitle
-    )
+    ))
     setIsPending(false)
 
     if (result.success) {
@@ -106,7 +108,7 @@ export default function TalentPolicyManager({ policies, communityId }: { policie
   const handleDeleteBonus = async (policyId: string) => {
     if (!confirm('정말 삭제하시겠습니까?')) return
     setIsPending(true)
-    const result = await deleteBonusPolicy(policyId, communityId)
+    const result = await trackAction('deleteBonusPolicy', () => deleteBonusPolicy(policyId, communityId))
     setIsPending(false)
     if (!result.success) {
       alert('삭제 실패: ' + result.error)
@@ -202,7 +204,6 @@ export default function TalentPolicyManager({ policies, communityId }: { policie
                 type="text" 
                 value={bonusTitle} 
                 onChange={(e) => setBonusTitle(e.target.value)}
-                placeholder="예: 추석 특별 보너스 기간!"
                 disabled={isPending}
                 required
               />

@@ -1,58 +1,43 @@
 import { formatInTimeZone } from 'date-fns-tz'
 
-export function getActiveItemsForDay(allItems: any[], dayStr: string) {
-  return allItems?.filter(item => {
-    if (item.type === 'SYSTEM') return true
-    
-    const createdStr = formatInTimeZone(new Date(item.created_at), 'Asia/Seoul', 'yyyy-MM-dd')
-    if (createdStr > dayStr) return false
-    
-    if (item.deleted_at) {
-      const deletedStr = formatInTimeZone(new Date(item.deleted_at), 'Asia/Seoul', 'yyyy-MM-dd')
-      if (deletedStr < dayStr) return false
-    } else if (!item.is_active) {
-      const updatedStr = formatInTimeZone(new Date(item.updated_at), 'Asia/Seoul', 'yyyy-MM-dd')
-      if (updatedStr < dayStr) return false
-    }
-    return true
-  }) || []
+export type ProgressItem = {
+  id: string
+  type: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  deleted_at?: string | null
+}
+export type ProgressRecord = {
+  checklist_item_id: string
+  record_date: string
+  completed: boolean
+  deleted_at?: string | null
 }
 
-export function calculateDayProgress(allItems: any[], dayRecords: any[], dayStr: string) {
-  const activeItemsForDay = getActiveItemsForDay(allItems, dayStr)
-  const total = activeItemsForDay.length
-  
-  if (total === 0) return { percentage: 0, total: 0, completed: 0 }
-  
-  const completed = dayRecords.filter(r => 
-    r.record_date === dayStr && 
-    r.completed && 
-    activeItemsForDay.some(ai => ai.id === r.checklist_item_id)
-  ).length
-  
-  const percentage = (completed / total) * 100
-  return { percentage, total, completed }
+export function getActiveItemsForDay(allItems: ProgressItem[], dayStr: string) {
+  return allItems.filter(item => {
+    const created = formatInTimeZone(new Date(item.created_at), 'Asia/Seoul', 'yyyy-MM-dd')
+    if (created > dayStr) return false
+    // A date-only record cannot distinguish changes within the same day.
+    const endedAt = item.deleted_at || (!item.is_active ? item.updated_at : null)
+    return !endedAt || formatInTimeZone(new Date(endedAt), 'Asia/Seoul', 'yyyy-MM-dd') >= dayStr
+  })
 }
 
-export function calculateWeekProgress(allItems: any[], weekRecords: any[], weekDaysStr: string[]) {
-  let totalWeekItems = 0
-  let totalCompletedWeekItems = 0
-  
-  for (const dayStr of weekDaysStr) {
-    // Only count days up to today? 
-    // Wait, if it's in the future, activeItemsForDay might be > 0.
-    // If we want 100% week progress, they must complete all days Mon-Sun.
-    // So future days will just have 0 completed, reducing the week progress from 100%. That's correct for Perfect Week!
-    const { total, completed } = calculateDayProgress(allItems, weekRecords, dayStr)
-    totalWeekItems += total
-    totalCompletedWeekItems += completed
-  }
+export function calculateDayProgress(allItems: ProgressItem[], dayRecords: ProgressRecord[], dayStr: string) {
+  const active = getActiveItemsForDay(allItems, dayStr)
+  const ids = new Set(active.map(item => item.id))
+  const completed = new Set(dayRecords.filter(record =>
+    record.record_date === dayStr && record.completed && !record.deleted_at && ids.has(record.checklist_item_id)
+  ).map(record => record.checklist_item_id)).size
+  const total = active.length
+  return { percentage: total ? completed / total * 100 : 0, total, completed }
+}
 
-  const percentage = totalWeekItems > 0 ? (totalCompletedWeekItems / totalWeekItems) * 100 : 0
-  return {
-    percentage,
-    total: totalWeekItems,
-    completed: totalCompletedWeekItems,
-    isPerfect: totalWeekItems > 0 && totalCompletedWeekItems === totalWeekItems
-  }
+export function calculateWeekProgress(allItems: ProgressItem[], weekRecords: ProgressRecord[], weekDaysStr: string[]) {
+  const days = weekDaysStr.map(day => calculateDayProgress(allItems, weekRecords, day))
+  const total = days.reduce((sum, day) => sum + day.total, 0)
+  const completed = days.reduce((sum, day) => sum + day.completed, 0)
+  return { percentage: total ? completed / total * 100 : 0, total, completed, isPerfect: total > 0 && completed === total }
 }

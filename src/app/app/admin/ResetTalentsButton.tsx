@@ -1,5 +1,7 @@
 'use client'
 
+import { trackAction } from '@/lib/analytics/client'
+
 import { useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { Loader2, RotateCcw } from 'lucide-react'
@@ -15,7 +17,7 @@ export default function ResetTalentsButton({ communityId }: { communityId: strin
     if (!confirmed) return
 
     startTransition(async () => {
-      const result = await resetCommunityTalents(communityId)
+      const result = await trackAction('resetCommunityTalents', () => resetCommunityTalents(communityId))
       if (result.error) {
         alert('초기화 실패: ' + result.error)
       } else {

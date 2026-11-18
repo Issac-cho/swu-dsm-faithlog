@@ -1,5 +1,7 @@
 'use client'
 
+import { trackAction } from '@/lib/analytics/client'
+
 import { useTransition, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -31,7 +33,7 @@ export default function AdminShepherdManager({
     if (!shepherdId || !sheepId || shepherdId === sheepId) return
 
     startTransition(async () => {
-      await assignShepherd(shepherdId, sheepId)
+      await trackAction('assignShepherd', () => assignShepherd(shepherdId, sheepId))
       setShepherdId('')
       setSheepId('')
     })
@@ -39,7 +41,7 @@ export default function AdminShepherdManager({
 
   const handleRemove = (relId: string) => {
     startTransition(async () => {
-      await removeShepherd(relId)
+      await trackAction('removeShepherd', () => removeShepherd(relId))
     })
   }
 

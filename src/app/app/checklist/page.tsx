@@ -75,6 +75,7 @@ export default async function ChecklistPage({
   const { data: records } = await supabase
     .from('checklist_records')
     .select('*')
+    .is('deleted_at', null)
     .eq('user_id', user.id)
     .eq('record_date', date)
 
@@ -99,7 +100,7 @@ export default async function ChecklistPage({
 
       <Card className={`relative overflow-hidden transition-all duration-300 ${activeBonus ? 'border-yellow-400 bg-gradient-to-br from-yellow-50 to-orange-50 shadow-md ring-1 ring-yellow-400/50' : ''}`}>
         {activeBonus && (
-          <div className="absolute top-0 right-0 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg shadow-sm animate-pulse">
+          <div className="absolute top-0 right-0 bg-gradient-to-r from-yellow-400 to-yellow-600 text-yellow-950 text-xs font-bold px-3 py-1 rounded-bl-lg shadow-sm animate-pulse">
             보너스 기간!
           </div>
         )}
@@ -114,7 +115,7 @@ export default async function ChecklistPage({
                 <div className="text-sm font-bold text-yellow-700 flex items-center justify-end">
                   ✨ {activeBonus.bonus_title} ✨
                 </div>
-                <div className="text-[10px] text-yellow-700/70 font-medium">
+                <div className="text-xs text-yellow-700/70 font-medium">
                   {activeBonus.bonus_start_date} ~ {activeBonus.bonus_end_date}
                 </div>
               </div>
@@ -124,7 +125,7 @@ export default async function ChecklistPage({
         <CardContent className="space-y-2">
           {items?.map((item) => (
             <ChecklistItemComponent
-              key={item.id}
+              key={`${date}-${item.id}`}
               item={item}
               date={date}
               record={recordsMap[item.id]}

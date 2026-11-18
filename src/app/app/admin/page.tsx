@@ -1,11 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import Link from 'next/link'
-import { createCell } from './actions'
+import CreateCellForm from '@/app/app/admin/CreateCellForm'
 import CellAssigner from './CellAssigner'
 import CellManager from './CellManager'
 import AdminShepherdManager from './AdminShepherdManager'
@@ -102,11 +100,7 @@ export default async function AdminPage() {
             <CardTitle>셀 추가</CardTitle>
           </CardHeader>
           <CardContent>
-            <form action={async (fd) => { 'use server'; await createCell(fd) }} className="flex gap-2">
-              <input type="hidden" name="communityId" value={communityId} />
-              <Input name="name" placeholder="새로운 셀 이름 (예: 1셀)" required />
-              <Button type="submit">추가</Button>
-            </form>
+            <CreateCellForm communityId={communityId} />
             <div className="mt-6 space-y-2">
               <h3 className="font-semibold text-sm text-muted-foreground">현재 셀 목록</h3>
               <CellManager cells={cells || []} />

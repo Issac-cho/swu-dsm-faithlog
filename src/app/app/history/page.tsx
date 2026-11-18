@@ -3,8 +3,8 @@ import { redirect } from 'next/navigation'
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, addDays, addMonths, subMonths, addYears, subYears, format, isSameMonth, subDays, eachDayOfInterval } from 'date-fns'
 import { formatInTimeZone } from 'date-fns-tz'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { calculateDayProgress, getActiveItemsForDay } from '@/utils/progress'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import HistoryTabs from './HistoryTabs'
 import DateJumpHeader from './DateJumpHeader'
 
@@ -115,7 +115,9 @@ export default async function HistoryPage({
   const prevWeekStr = format(subDays(weekStart, 7), 'yyyy-MM-dd')
   const nextWeekStr = format(addDays(weekStart, 7), 'yyyy-MM-dd')
 
-  const activeWeeklyItems = allItems?.filter(item => item.is_active && !item.deleted_at) || []
+  const activeWeeklyItems = (allItems || []).filter(item =>
+    weekDaysStr.some(day => getActiveItemsForDay([item], day).length > 0)
+  )
 
   const { data: weekRecords } = await supabase
     .from('checklist_records')
@@ -155,26 +157,7 @@ export default async function HistoryPage({
 
   calendarDays.forEach(day => {
     const dayStr = format(day, 'yyyy-MM-dd')
-    const activeItemsForDay = allItems?.filter(item => {
-      if (item.type === 'SYSTEM') return true
-      const createdStr = formatInTimeZone(new Date(item.created_at), 'Asia/Seoul', 'yyyy-MM-dd')
-      if (createdStr > dayStr) return false
-      
-      if (item.deleted_at) {
-        const deletedStr = formatInTimeZone(new Date(item.deleted_at), 'Asia/Seoul', 'yyyy-MM-dd')
-        if (deletedStr < dayStr) return false
-      } else if (!item.is_active) {
-        const updatedStr = formatInTimeZone(new Date(item.updated_at), 'Asia/Seoul', 'yyyy-MM-dd')
-        if (updatedStr < dayStr) return false
-      }
-      return true
-    }) || []
-
-    const total = activeItemsForDay.length
-    const dayRecords = monthRecords?.filter(r => r.record_date === dayStr && r.completed) || []
-    const completed = dayRecords.filter(r => activeItemsForDay.some(ai => ai.id === r.checklist_item_id)).length
-    
-    const percentage = total > 0 ? (completed / total) * 100 : 0
+    const { percentage, total } = calculateDayProgress(allItems || [], monthRecords || [], dayStr)
     monthlyProgressMap.set(dayStr, { percentage, total })
   })
 
@@ -197,6 +180,7 @@ export default async function HistoryPage({
       .from('checklist_records')
       .select('checklist_item_id, record_date, completed')
       .eq('user_id', queryUserId)
+      .is('deleted_at', null)
       .gte('record_date', format(yearlyCalendarStart, 'yyyy-MM-dd'))
       .lte('record_date', format(yearlyCalendarEnd, 'yyyy-MM-dd'))
       .limit(10000)
@@ -208,26 +192,7 @@ export default async function HistoryPage({
   if (activeTab === 'yearly') {
     yearlyDays.forEach(day => {
       const dayStr = format(day, 'yyyy-MM-dd')
-      const activeItemsForDay = allItems?.filter(item => {
-        if (item.type === 'SYSTEM') return true
-        const createdStr = formatInTimeZone(new Date(item.created_at), 'Asia/Seoul', 'yyyy-MM-dd')
-        if (createdStr > dayStr) return false
-        
-        if (item.deleted_at) {
-          const deletedStr = formatInTimeZone(new Date(item.deleted_at), 'Asia/Seoul', 'yyyy-MM-dd')
-          if (deletedStr < dayStr) return false
-        } else if (!item.is_active) {
-          const updatedStr = formatInTimeZone(new Date(item.updated_at), 'Asia/Seoul', 'yyyy-MM-dd')
-          if (updatedStr < dayStr) return false
-        }
-        return true
-      }) || []
-
-      const total = activeItemsForDay.length
-      const dayRecords = yearRecords?.filter(r => r.record_date === dayStr && r.completed) || []
-      const completed = dayRecords.filter(r => activeItemsForDay.some(ai => ai.id === r.checklist_item_id)).length
-      
-      const percentage = total > 0 ? (completed / total) * 100 : 0
+      const { percentage, total } = calculateDayProgress(allItems || [], yearRecords, dayStr)
       yearlyProgressMap.set(dayStr, { percentage, total })
     })
   }
@@ -281,32 +246,30 @@ export default async function HistoryPage({
                   <tbody>
                     {activeWeeklyItems.map(item => (
                         <tr key={item.id}>
-                          <td className="border p-2 font-medium text-sm text-center">{item.name}</td>
+                          <td className="border p-2 font-medium text-sm text-center">{item.name}{(item.deleted_at || !item.is_active) && <span className="block text-xs text-muted-foreground">보관</span>}</td>
                           {weekDaysStr.map(dateStr => {
                             const record = weeklyRecordMap.get(`${item.id}-${dateStr}`)
                             const isCompleted = record?.completed
                             const isPast = dateStr < todayInKST
 
-                            let cellContent: React.ReactNode = null
-                            if (isCompleted) {
-                              if (record.memo) {
-                                cellContent = (
-                                  <div className="group relative inline-block cursor-help">
-                                    <span className="text-green-600 font-bold border-b border-dashed border-green-600">o</span>
-                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block z-10 w-max max-w-[200px] bg-popover text-popover-foreground text-xs p-2 rounded shadow-md border whitespace-normal text-left font-normal">
-                                      {record.memo}
-                                    </div>
-                                  </div>
-                                )
-                              } else {
-                                cellContent = <span className="text-green-600 font-bold">o</span>
-                              }
-                            } else if (isPast) {
-                              cellContent = <span className="text-red-500 font-medium">x</span>
-                            }
+                            const isActive = getActiveItemsForDay([item], dateStr).length > 0
+                            const status = isCompleted ? '완료' : isActive && isPast ? '미완료' : isActive ? '기록 없음' : '해당 없음'
+                            const mark = isCompleted ? 'o' : isActive && isPast ? 'x' : '—'
+                            const cellContent = record?.memo ? (
+                              <Popover>
+                                <PopoverTrigger aria-label={`${dateStr} ${item.name}: ${status}, 메모 보기`}
+                                  className="inline-flex min-h-11 min-w-11 items-center justify-center rounded border border-border font-bold text-primary focus-visible:outline-2 focus-visible:outline-ring">
+                                  {mark}<span className="ml-0.5 text-xs" aria-hidden="true">✎</span>
+                                </PopoverTrigger>
+                                <PopoverContent className="max-w-[calc(100vw-2rem)] whitespace-pre-wrap break-words p-3">
+                                  <p className="font-semibold">{dateStr} · {item.name} · {status}</p>
+                                  <p>{record.memo}</p>
+                                </PopoverContent>
+                              </Popover>
+                            ) : <span aria-label={status} className={isCompleted ? 'font-bold text-green-700' : 'text-muted-foreground'}>{mark}</span>
 
                             return (
-                              <td key={dateStr} className="border p-2 text-center align-middle">
+                              <td key={dateStr} className="border p-0 text-center align-middle">
                                 {cellContent}
                               </td>
                             )
@@ -400,7 +363,7 @@ export default async function HistoryPage({
                   
                   return (
                     <div key={i} className="flex items-center gap-1.5">
-                      <div className="w-10 text-[10px] font-bold text-muted-foreground text-right pr-2">
+                      <div className="w-10 text-xs font-bold text-muted-foreground text-right pr-2">
                         {monthLabel}
                       </div>
                       {week.map((day, j) => {

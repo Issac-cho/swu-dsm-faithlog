@@ -113,12 +113,12 @@ export default async function DirectoryPage() {
                   <div className="font-bold">{name}</div>
                   <div className="text-xs text-muted-foreground flex flex-wrap items-center justify-center gap-1 mt-1">
                     {member.role === 'admin' && (
-                      <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded text-[10px] font-bold">
+                      <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded text-xs font-bold">
                         관리자
                       </span>
                     )}
                     {member.role === 'sub_admin' && (
-                      <span className="bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded text-[10px] font-semibold">
+                      <span className="bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded text-xs font-semibold">
                         부관리자
                       </span>
                     )}

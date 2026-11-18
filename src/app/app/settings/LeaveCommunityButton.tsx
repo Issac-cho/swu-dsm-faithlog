@@ -1,5 +1,7 @@
 'use client'
 
+import { trackAction } from '@/lib/analytics/client'
+
 import { Button } from '@/components/ui/button'
 import { leaveCommunity } from './actions'
 import { useState } from 'react'
@@ -14,7 +16,7 @@ export default function LeaveCommunityButton({ communityName }: { communityName:
     
     setIsPending(true)
     try {
-      const res = await leaveCommunity()
+      const res = await trackAction('leaveCommunity', () => leaveCommunity())
       if (res?.error) {
         alert('오류가 발생했습니다: ' + res.error)
         setIsPending(false)

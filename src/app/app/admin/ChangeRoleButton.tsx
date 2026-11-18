@@ -1,5 +1,7 @@
 'use client'
 
+import { trackAction } from '@/lib/analytics/client'
+
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { changeMemberRole } from './actions'
@@ -26,7 +28,7 @@ export default function ChangeRoleButton({
 
     setLoading(true)
     try {
-      const res = await changeMemberRole(membershipId, newRole)
+      const res = await trackAction('changeMemberRole', () => changeMemberRole(membershipId, newRole))
       if (res?.error) {
         alert(res.error)
       } else {

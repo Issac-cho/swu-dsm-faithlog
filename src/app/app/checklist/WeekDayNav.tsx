@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { format } from 'date-fns'
 
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토']
 
@@ -27,6 +26,7 @@ export default function WeekDayNav({
         return (
           <Link
             key={dayStr}
+            aria-current={isSelected ? 'date' : undefined}
             href={`/app/checklist?date=${dayStr}`}
             className={cn(
               'flex-1 flex flex-col items-center py-2 px-1 rounded-lg transition-colors text-center',
@@ -36,7 +36,7 @@ export default function WeekDayNav({
               isToday && !isSelected && 'border-2 border-primary'
             )}
           >
-            <span className="text-[10px] font-medium">{dayOfWeek}</span>
+            <span className="text-xs font-medium">{dayOfWeek}</span>
             <span className="text-sm font-bold">{dayNum}</span>
           </Link>
         )

@@ -1,5 +1,7 @@
 'use client'
 
+import { trackAction } from '@/lib/analytics/client'
+
 import { useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { Gift, Loader2 } from 'lucide-react'
@@ -11,7 +13,7 @@ export default function ClaimBonusButton({ weekStart }: { weekStart: string }) {
 
   const handleClaim = () => {
     startTransition(async () => {
-      const result = await claimPerfectWeekBonus(weekStart)
+      const result = await trackAction('claimPerfectWeekBonus', () => claimPerfectWeekBonus(weekStart))
       if (result.success) {
         setClaimed(true)
       } else {

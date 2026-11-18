@@ -1,5 +1,7 @@
 'use client'
 
+import { trackAction } from '@/lib/analytics/client'
+
 import { useTransition } from 'react'
 import { assignUserToCell } from './actions'
 import {
@@ -27,7 +29,7 @@ export default function CellAssigner({
     startTransition(async () => {
       if (val === null) return;
       const cellId = val === 'none' ? null : val
-      await assignUserToCell(membershipId, cellId)
+      await trackAction('assignUserToCell', () => assignUserToCell(membershipId, cellId))
     })
   }
 

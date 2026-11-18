@@ -1,5 +1,7 @@
 'use client'
 
+import { trackAction } from '@/lib/analytics/client'
+
 import { useState, useTransition } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -24,7 +26,7 @@ export default function CellManager({ cells }: { cells: Cell[] }) {
   const handleSave = (cellId: string) => {
     if (!editName.trim()) return
     startTransition(async () => {
-      const result = await renameCell(cellId, editName)
+      const result = await trackAction('renameCell', () => renameCell(cellId, editName))
       if (result.error) {
         alert(result.error)
       } else {
@@ -39,7 +41,7 @@ export default function CellManager({ cells }: { cells: Cell[] }) {
     )
     if (!confirmed) return
     startTransition(async () => {
-      const result = await deleteCell(cell.id)
+      const result = await trackAction('deleteCell', () => deleteCell(cell.id))
       if (result.error) alert(result.error)
     })
   }
@@ -69,6 +71,7 @@ export default function CellManager({ cells }: { cells: Cell[] }) {
                 size="icon"
                 variant="default"
                 className="h-8 w-8 shrink-0"
+                aria-label={`${cell.name} 이름 저장`}
                 onClick={() => handleSave(cell.id)}
                 disabled={isPending || !editName.trim()}
               >
@@ -78,6 +81,7 @@ export default function CellManager({ cells }: { cells: Cell[] }) {
                 size="icon"
                 variant="outline"
                 className="h-8 w-8 shrink-0"
+                aria-label="이름 수정 취소"
                 onClick={() => setEditingId(null)}
                 disabled={isPending}
               >

@@ -19,7 +19,6 @@ export default async function WeeklyProgressCard({ userId, communityId }: { user
     .eq('user_id', userId)
     .eq('community_id', communityId)
     .eq('type', 'SYSTEM')
-    .is('deleted_at', null)
 
   const { data: weekRecords } = await supabase
     .from('checklist_records')
@@ -99,7 +98,7 @@ export default async function WeeklyProgressCard({ userId, communityId }: { user
 
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span>이번 주 전체 진행률</span>
+            <span>이번 주 기본 항목 진행률</span>
             <span className="font-bold text-primary">{roundedPercentage}%</span>
           </div>
           <div className="h-4 w-full bg-muted rounded-full overflow-hidden">
@@ -125,7 +124,7 @@ export default async function WeeklyProgressCard({ userId, communityId }: { user
         
         {!progress.isPerfect && (
           <div className="text-center py-2 text-sm text-muted-foreground bg-background rounded-md border">
-            100% 달성 시 보너스 달란트 지급!
+            기본 항목을 일주일 모두 완료하면 보너스 달란트 지급!
           </div>
         )}
 

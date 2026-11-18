@@ -172,7 +172,7 @@ export async function renameCell(cellId: string, newName: string) {
   return { success: true }
 }
 
-// Delete a cell (nullifies member cell assignments first)
+// Delete a cell; the foreign key clears member assignments.
 export async function deleteCell(cellId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -186,11 +186,9 @@ export async function deleteCell(cellId: string) {
   const { data: membership } = await supabase.from('community_memberships').select('role').eq('user_id', user.id).eq('community_id', cell.community_id).maybeSingle()
   if (!isOperator && !['admin', 'sub_admin'].includes(membership?.role)) return { error: '관리자 권한이 없습니다.' }
 
-  // Nullify member cell assignments before deleting (preserve members)
-  await supabase.from('community_memberships').update({ cell_id: null }).eq('cell_id', cellId)
-
-  const { error } = await supabase.from('cells').delete().eq('id', cellId)
+  const { data: deleted, error } = await supabase.from('cells').delete().eq('id', cellId).select('id').maybeSingle()
   if (error) return { error: error.message }
+  if (!deleted) return { error: '셀이 삭제되지 않았습니다. 삭제 권한을 확인해주세요.' }
 
   revalidatePath('/app/admin')
   revalidatePath('/', 'layout')
@@ -203,23 +201,7 @@ export async function resetCommunityTalents(communityId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Unauthorized' }
 
-  const { data: operatorData } = await supabase.from('system_operators').select('user_id').eq('user_id', user.id).maybeSingle()
-  const isOperator = !!operatorData
-  const { data: membership } = await supabase
-    .from('community_memberships')
-    .select('role')
-    .eq('user_id', user.id)
-    .eq('community_id', communityId)
-    .maybeSingle()
-
-  if (!isOperator && !['admin', 'sub_admin'].includes(membership?.role)) {
-    return { error: '관리자 권한이 없습니다.' }
-  }
-
-  const { error } = await supabase
-    .from('talent_transactions')
-    .delete()
-    .eq('community_id', communityId)
+  const { error } = await supabase.rpc('reset_community_talents', { p_community_id: communityId })
 
   if (error) return { error: error.message }
 

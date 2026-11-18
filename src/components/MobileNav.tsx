@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
 import { Menu } from 'lucide-react'
 
 type NavItem = {
@@ -30,15 +29,15 @@ export default function MobileNav({ isAdmin, isOperator }: { isAdmin: boolean, i
   return (
     <div className="md:hidden">
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger className="md:hidden inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground h-9 w-9">
+        <SheetTrigger className="md:hidden inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground h-11 w-11">
           <Menu className="h-5 w-5" />
           <span className="sr-only">메뉴 열기</span>
         </SheetTrigger>
-        <SheetContent side="right" className="w-[250px] sm:w-[300px] p-6">
-          <SheetHeader className="mb-6">
+        <SheetContent side="right" className="w-[250px] sm:w-[300px] p-6 max-h-dvh overflow-hidden">
+          <SheetHeader className="mb-2 shrink-0">
             <SheetTitle className="text-left text-2xl font-bold">메뉴</SheetTitle>
           </SheetHeader>
-          <nav className="flex flex-col gap-2">
+          <nav className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pb-4">
             {navItems.map((item) => (
               <Link
                 key={item.href}

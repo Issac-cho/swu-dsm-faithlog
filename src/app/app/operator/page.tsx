@@ -58,6 +58,8 @@ export default async function OperatorHomePage() {
         </div>
       </div>
 
+      <Link href="/app/operator/analytics" className={buttonVariants({ variant: "outline" })}>사용 분석 보기</Link>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Link href="/app/operator/users" className="block transition-transform hover:scale-[1.02]">
           <Card className="bg-destructive/5 border-destructive/20 h-full hover:border-destructive/40 transition-colors cursor-pointer">

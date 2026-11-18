@@ -33,7 +33,7 @@ export default function SignupPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">이름 (실명)</Label>
-              <Input id="name" name="name" placeholder="홍길동" required />
+              <Input id="name" name="name" required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">이메일</Label>
